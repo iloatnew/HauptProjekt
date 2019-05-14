@@ -9,7 +9,7 @@ public class Block
 {
 	enum Cubeside {BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK};
 	public enum BlockType {GRASS, DIRT, WATER, STONE, LEAVES, WOOD, WOODBASE, SAND, GOLD, BEDROCK, REDSTONE, DIAMOND, NOCRACK, 
-							CRACK1, CRACK2, CRACK3, CRACK4, AIR};
+							CRACK1, CRACK2, CRACK3, CRACK4, LAVA, AIR};
 
 	public BlockType blockType;
 	public bool isSolid;
@@ -19,7 +19,7 @@ public class Block
 
 	public BlockType health;
 	public int currentHealth;
-	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0};
+	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0};
 
     // Hard-coded UVs based on blockuvs.txt
 	Vector2[,] blockUVs = { 
@@ -58,7 +58,9 @@ public class Block
  		/*CRACK3*/			{ new Vector2(0.125f,0f),  new Vector2(0.1875f,0f),
  								new Vector2(0.125f,0.0625f), new Vector2(0.1875f,0.0625f)},
  		/*CRACK4*/			{ new Vector2(0.1875f,0f),  new Vector2(0.25f,0f),
- 								new Vector2(0.1875f,0.0625f), new Vector2(0.25f,0.0625f)}
+ 								new Vector2(0.1875f,0.0625f), new Vector2(0.25f,0.0625f)},
+		/*LAVA*/			{ new Vector2(0.9375f,0f),  new Vector2(1f,0f),
+								new Vector2(0.9375f,0.0625f), new Vector2(1f,0.0625f)}
 						}; 
 
     /// <summary>

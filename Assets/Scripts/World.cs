@@ -223,17 +223,17 @@ public class World : MonoBehaviour
 											(int)(player.transform.position.y/chunkSize),
 											(int)(player.transform.position.z/chunkSize));
 		// Draw starting chunk
-		queue.Run(DrawChunks());
+		queue.Run( DrawChunks() );
 
 		// Create further chunks
-		queue.Run(BuildRecursiveWorld((int)(player.transform.position.x/chunkSize),
-											(int)(player.transform.position.y/chunkSize),
-											(int)(player.transform.position.z/chunkSize),radius,radius));
+		queue.Run( BuildRecursiveWorld( (int)(player.transform.position.x / chunkSize),
+											(int)(player.transform.position.y / chunkSize),
+											(int)(player.transform.position.z / chunkSize), radius, radius ) );
 	}
-	
-    /// <summary>
-    /// Unity lifecycle update method. Actviates the player's GameObject. Updates chunks based on the player's position.
-    /// </summary>
+
+	/// <summary>
+	/// Unity lifecycle update method. Actviates the player's GameObject. Updates chunks based on the player's position.
+	/// </summary>
 	void Update ()
     {
         // Determine whether to build/load more chunks around the player's location

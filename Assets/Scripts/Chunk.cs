@@ -161,17 +161,19 @@ public class Chunk
                     // Place Diamond, Redstone or Stone at certain heights and probabilities
 					else if(worldY <= Utils.GenerateStoneHeight(worldX,worldZ))
 					{
-						if(Utils.fBM3D(worldX, worldY, worldZ, 0.01f, 2) < 0.4f && worldY < 40)
-							chunkData[x,y,z] = new Block(Block.BlockType.DIAMOND, pos, 
-						                chunk.gameObject, this);
-						else if(Utils.fBM3D(worldX, worldY, worldZ, 0.03f, 3) < 0.41f && worldY < 20)
-							chunkData[x,y,z] = new Block(Block.BlockType.REDSTONE, pos, 
-						                chunk.gameObject, this);
+						if (Utils.fBM3D( worldX, worldY, worldZ, 0.01f, 2 ) < 0.4f && worldY < 40)
+							chunkData[x, y, z] = new Block( Block.BlockType.DIAMOND, pos,
+										chunk.gameObject, this );
+						else if (Utils.fBM3D( worldX, worldY, worldZ, 0.03f, 3 ) < 0.41f && worldY < 20)
+							chunkData[x, y, z] = new Block( Block.BlockType.REDSTONE, pos,
+										chunk.gameObject, this );
 						else
-							chunkData[x,y,z] = new Block(Block.BlockType.STONE, pos, 
-						                chunk.gameObject, this);
+							chunkData[x, y, z] = new Block( Block.BlockType.LAVA, pos,
+										  chunk.gameObject, this );
+						 //chunkData[x,y,z] = new Block(Block.BlockType.STONE, pos, 
+						 //               chunk.gameObject, this);
 					}
-                    // Place trunks of a tree or grass blocks on the surface
+					// Place trunks of a tree or grass blocks on the surface
 					else if(worldY == surfaceHeight)
 					{
 						if(Utils.fBM3D(worldX, worldY, worldZ, 0.4f, 2) < 0.4f)
