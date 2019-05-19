@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -7,19 +8,20 @@ using UnityEngine;
 /// </summary>
 public class Block
 {
-	enum Cubeside {BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK};
+	enum Cubeside {BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK, DIAGONALLEFT, DIAGONALRIGHT,DIAGONALFRONT, DIAGONALBACK };
 	public enum BlockType {GRASS, DIRT, WATER, STONE, LEAVES, WOOD, WOODBASE, SAND, GOLD, BEDROCK, REDSTONE, DIAMOND, NOCRACK, 
-							CRACK1, CRACK2, CRACK3, CRACK4, LAVA, AIR};
+							CRACK1, CRACK2, CRACK3, CRACK4, LAVA, FLOWER, AIR};
 
 	public BlockType blockType;
 	public bool isSolid;
+	public bool isFlower;
 	public Chunk owner;
 	GameObject parent;
 	public Vector3 position;
 
 	public BlockType health;
 	public int currentHealth;
-	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0};
+	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
 
     // Hard-coded UVs based on blockuvs.txt
 	Vector2[,] blockUVs = { 
@@ -60,7 +62,9 @@ public class Block
  		/*CRACK4*/			{ new Vector2(0.1875f,0f),  new Vector2(0.25f,0f),
  								new Vector2(0.1875f,0.0625f), new Vector2(0.25f,0.0625f)},
 		/*LAVA*/			{ new Vector2(0.9375f,0f),  new Vector2(1f,0f),
-								new Vector2(0.9375f,0.0625f), new Vector2(1f,0.0625f)}
+								new Vector2(0.9375f,0.0625f), new Vector2(1f,0.0625f)},
+		/*FLOWER*/			{ new Vector2(0,0f),  new Vector2(1,0f),
+								new Vector2(0,1), new Vector2(1,1)}
 						}; 
 
     /// <summary>
@@ -87,12 +91,16 @@ public class Block
 	public void SetType(BlockType b)
 	{
 		blockType = b;
-		if(blockType == BlockType.AIR || blockType == BlockType.WATER)
+		if(blockType == BlockType.AIR || blockType == BlockType.WATER || blockType == BlockType.FLOWER)
 			isSolid = false;
 		else
 			isSolid = true;
-
-		if(blockType == BlockType.WATER)
+		if (blockType == BlockType.FLOWER)
+		{
+			isFlower = true;
+			parent = owner.flower.gameObject;
+		}
+		else if (blockType == BlockType.WATER)
 		{
 			parent = owner.fluid.gameObject;
 		}
@@ -170,15 +178,96 @@ public class Block
 		owner.Redraw();
 		return false;
 	}
-
-    /// <summary>
-    /// Assembles one side of a cube's mesh by selecting the UVs, defining the vertices and calculating the normals.
-    /// </summary>
-    /// <param name="side">Quad to be created for this side</param>
-	private void CreateQuad(Cubeside side)
+	private void CreatFlower( Cubeside side )
 	{
 		Mesh mesh = new Mesh();
-	    mesh.name = "ScriptedMesh" + side.ToString(); 
+		mesh.name = "ScriptedMesh" + side.ToString();
+
+		Vector3[] vertices = new Vector3[4];
+		Vector3[] normals = new Vector3[4];
+		Vector2[] uvs = new Vector2[4];
+		List<Vector2> suvs = new List<Vector2>();
+		int[] triangles = new int[6];
+
+		// All possible UVs
+		Vector2 uv00;
+		Vector2 uv10;
+		Vector2 uv01;
+		Vector2 uv11;
+		uv00 = blockUVs[(int)(blockType + 1), 0];
+		uv10 = blockUVs[(int)(blockType + 1), 1];
+		uv01 = blockUVs[(int)(blockType + 1), 2];
+		uv11 = blockUVs[(int)(blockType + 1), 3];
+		
+		//{uv11, uv01, uv00, uv10};
+
+		// All possible vertices 
+		// Top vertices
+		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f )/2; //p3
+		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f ) / 2;  //p0
+		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f ) / 2; //p7
+		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f ) / 2; //p4
+		// Bottom vertices
+		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f ) / 2; //p2
+		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f ) / 2; //p1
+		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f ) / 2;
+		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f ) / 2; //p5
+
+		switch (side)
+		{
+			case Cubeside.DIAGONALLEFT:
+				vertices = new Vector3[] { p4, p6, p2, p0 };
+				normals = new Vector3[] {Vector3.forward*0.5f, Vector3.forward*0.5f,
+											Vector3.forward*0.5f, Vector3.forward*0.5f};
+				uvs = new Vector2[] { uv11, uv01, uv00, uv10 };
+				triangles = new int[] { 3, 1, 0, 3, 2, 1 };
+				break;
+			case Cubeside.DIAGONALRIGHT:
+				vertices = new Vector3[] { p7, p5, p1, p3 };
+				normals = new Vector3[] {Vector3.back*0.5f, Vector3.back*0.5f,
+											Vector3.back*0.5f, Vector3.back*0.5f};
+				uvs = new Vector2[] { uv11, uv01, uv00, uv10 };
+				triangles = new int[] { 3, 1, 0, 3, 2, 1 };
+				break;
+			case Cubeside.DIAGONALFRONT:
+				vertices = new Vector3[] { p5, p7, p3, p1 };
+				normals = new Vector3[] {Vector3.back*0.5f, Vector3.back*0.5f,
+											Vector3.back*0.5f, Vector3.back*0.5f};
+				uvs = new Vector2[] { uv11, uv01, uv00, uv10 };
+				triangles = new int[] { 3, 1, 0, 3, 2, 1 };
+				break;
+			case Cubeside.DIAGONALBACK:
+				vertices = new Vector3[] { p6, p4, p0, p2 };
+				normals = new Vector3[] {Vector3.back*0.5f, Vector3.back*0.5f,
+											Vector3.back*0.5f, Vector3.back*0.5f};
+				uvs = new Vector2[] { uv11, uv01, uv00, uv10 };
+				triangles = new int[] { 3, 1, 0, 3, 2, 1 };
+				break;
+		}
+		
+		mesh.vertices = vertices;
+		mesh.normals = normals;
+		mesh.uv = uvs;
+		mesh.SetUVs( 1, suvs );
+		mesh.triangles = triangles;
+
+		mesh.RecalculateBounds();
+	
+		GameObject quad = new GameObject( "Quad" );
+		quad.transform.position = position;
+		quad.transform.parent = this.parent.transform;
+
+		MeshFilter meshFilter = (MeshFilter)quad.AddComponent( typeof( MeshFilter ) );
+		meshFilter.mesh = mesh;
+	}
+	/// <summary>
+	/// Assembles one side of a cube's mesh by selecting the UVs, defining the vertices and calculating the normals.
+	/// </summary>
+	/// <param name="side">Quad to be created for this side</param>
+	private void CreateQuad( Cubeside side )
+	{
+		Mesh mesh = new Mesh();
+		mesh.name = "ScriptedMesh" + side.ToString();
 
 		Vector3[] vertices = new Vector3[4];
 		Vector3[] normals = new Vector3[4];
@@ -192,48 +281,56 @@ public class Block
 		Vector2 uv01;
 		Vector2 uv11;
 
-		if(blockType == BlockType.GRASS && side == Cubeside.TOP)
+		if (blockType == BlockType.GRASS && side == Cubeside.TOP)
 		{
-			uv00 = blockUVs[0,0];
-			uv10 = blockUVs[0,1];
-			uv01 = blockUVs[0,2];
-			uv11 = blockUVs[0,3];
+			uv00 = blockUVs[0, 0];
+			uv10 = blockUVs[0, 1];
+			uv01 = blockUVs[0, 2];
+			uv11 = blockUVs[0, 3];
 		}
-		else if(blockType == BlockType.GRASS && side == Cubeside.BOTTOM)
+		else if (blockType == BlockType.GRASS && side == Cubeside.BOTTOM)
 		{
-			uv00 = blockUVs[(int)(BlockType.DIRT+1),0];
-			uv10 = blockUVs[(int)(BlockType.DIRT+1),1];
-			uv01 = blockUVs[(int)(BlockType.DIRT+1),2];
-			uv11 = blockUVs[(int)(BlockType.DIRT+1),3];
+			uv00 = blockUVs[(int)(BlockType.DIRT + 1), 0];
+			uv10 = blockUVs[(int)(BlockType.DIRT + 1), 1];
+			uv01 = blockUVs[(int)(BlockType.DIRT + 1), 2];
+			uv11 = blockUVs[(int)(BlockType.DIRT + 1), 3];
 		}
 		else
 		{
-			uv00 = blockUVs[(int)(blockType+1),0];
-			uv10 = blockUVs[(int)(blockType+1),1];
-			uv01 = blockUVs[(int)(blockType+1),2];
-			uv11 = blockUVs[(int)(blockType+1),3];
+			uv00 = blockUVs[(int)(blockType + 1), 0];
+			uv10 = blockUVs[(int)(blockType + 1), 1];
+			uv01 = blockUVs[(int)(blockType + 1), 2];
+			uv11 = blockUVs[(int)(blockType + 1), 3];
 		}
 
 		// Set cracks
-		suvs.Add(blockUVs[(int)(health+1),3]);
-		suvs.Add(blockUVs[(int)(health+1),2]);
-		suvs.Add(blockUVs[(int)(health+1),0]);
-		suvs.Add(blockUVs[(int)(health+1),1]);
+		suvs.Add( blockUVs[(int)(health + 1), 3] );
+		suvs.Add( blockUVs[(int)(health + 1), 2] );
+		suvs.Add( blockUVs[(int)(health + 1), 0] );
+		suvs.Add( blockUVs[(int)(health + 1), 1] );
 
 		//{uv11, uv01, uv00, uv10};
 
 		// All possible vertices 
 		// Top vertices
-		Vector3 p0 = new Vector3( -0.5f,  -0.5f,  0.5f );
-		Vector3 p1 = new Vector3(  0.5f,  -0.5f,  0.5f );
-		Vector3 p2 = new Vector3(  0.5f,  -0.5f, -0.5f );
-		Vector3 p3 = new Vector3( -0.5f,  -0.5f, -0.5f );		 
+		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f );
+		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f );
+		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f );
+		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f );
 		// Bottom vertices
-		Vector3 p4 = new Vector3( -0.5f,   0.5f,  0.5f );
-		Vector3 p5 = new Vector3(  0.5f,   0.5f,  0.5f );
-		Vector3 p6 = new Vector3(  0.5f,   0.5f, -0.5f );
-		Vector3 p7 = new Vector3( -0.5f,   0.5f, -0.5f );
-		
+		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f );
+		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f );
+		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f );
+		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f );
+
+		Vector3[] smoothedTops = SmoothingTop( new Vector3[] { p4, p5, p6, p7 });
+		if (blockType == BlockType.GRASS)
+		{
+			p4 = smoothedTops[0];
+			p5 = smoothedTops[1];
+			p6 = smoothedTops[2];
+			p7 = smoothedTops[3];
+		}
 		switch(side)
 		{
 			case Cubeside.BOTTOM:
@@ -244,7 +341,8 @@ public class Block
 				triangles = new int[] { 3, 1, 0, 3, 2, 1};
 			break;
 			case Cubeside.TOP:
-				vertices = new Vector3[] {p7, p6, p5, p4};
+				// smooth efect for Grass on Top
+				vertices = new Vector3[] { p7, p6, p5, p4 };
 				normals = new Vector3[] {Vector3.up, Vector3.up, 
 											Vector3.up, Vector3.up};
 				uvs = new Vector2[] {uv11, uv01, uv00, uv10};
@@ -296,11 +394,35 @@ public class Block
 		meshFilter.mesh = mesh;
 	}
 
-    /// <summary>
-    /// Subtracts or adds the world's chunk size to convert a global block position value to local.
-    /// </summary>
-    /// <param name="i">Block position value (e.g. x coordinate)</param>
-    /// <returns>Returns the local value of the block position's coordinate</returns>
+	/// <summary>
+	/// based on the worldX and worldZ value, return a RealY value between -0.5 and 0.5
+	/// </summary>
+	/// <param name="vertices">4 top vertices</param>
+	/// <returns>Returns 4 modified top vertices.</returns>
+	private Vector3[] SmoothingTop( Vector3[] vertices )
+	{
+		Vector3[] smoothedVertices = new Vector3[vertices.Length];
+		int worldX = (int)(position.x + parent.transform.position.x);
+		int worldY = (int)(position.y + parent.transform.position.y);
+		int worldZ = (int)(position.z + parent.transform.position.z);
+		int i = 0;
+		foreach (Vector3 vertic in vertices) 
+		{
+			float realX = worldX + vertic.x;
+			float realZ = worldZ + vertic.z;
+			
+			float realY = Utils.GenerateHeightFloat( realX, realZ, -0.5f, 0.5f );
+			smoothedVertices[i] = new Vector3( vertic.x, realY, vertic.z );
+			i++;
+		}
+		return smoothedVertices;
+	}
+
+	/// <summary>
+	/// Subtracts or adds the world's chunk size to convert a global block position value to local.
+	/// </summary>
+	/// <param name="i">Block position value (e.g. x coordinate)</param>
+	/// <returns>Returns the local value of the block position's coordinate</returns>
 	int ConvertBlockIndexToLocal(int i)
 	{
 		if(i <= -1) 
@@ -399,6 +521,13 @@ public class Block
 	public void Draw()
 	{
 		if(blockType == BlockType.AIR) return;
+		// flowers are built in cross not cube
+		if (blockType == BlockType.FLOWER) { 
+			CreatFlower( Cubeside.DIAGONALLEFT ); 
+			CreatFlower( Cubeside.DIAGONALRIGHT );
+			CreatFlower( Cubeside.DIAGONALFRONT );
+			CreatFlower( Cubeside.DIAGONALBACK ); 
+			return; }
 		// Solid or same neighbour
 		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z + 1))
 			CreateQuad(Cubeside.FRONT);
@@ -413,4 +542,6 @@ public class Block
 		if(!HasSolidNeighbour((int)position.x + 1,(int)position.y,(int)position.z))
 			CreateQuad(Cubeside.RIGHT);
 	}
+
+	
 }

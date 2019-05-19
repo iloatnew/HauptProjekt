@@ -40,9 +40,11 @@ public class Chunk
 {
 	public Material cubeMaterial;   // Materia for solid blocks
 	public Material fluidMaterial;  // Material for transparent blocks
+	public Material flowerMaterial;
 	public Block[,,] chunkData;     // 3D Array containing all blocks of the chunk
 	public GameObject chunk;        // GameObject that holds the mesh of the solid parts of the chunk
 	public GameObject fluid;        // GameObject that holds the mesh of the transparent parts, like water, of the chunk
+	public GameObject flower;
 	public enum ChunkStatus
     {
         DRAW,                       // DRAW: data of the chunk has been created and needs to be rendered next
@@ -153,13 +155,13 @@ public class Chunk
 					}
 
 					int surfaceHeight = Utils.GenerateHeight(worldX,worldZ);
-					
-                    // Place bedrock at height 0
-					if(worldY == 0)
-						chunkData[x,y,z] = new Block(Block.BlockType.BEDROCK, pos, 
-						                chunk.gameObject, this);
-                    // Place Diamond, Redstone or Stone at certain heights and probabilities
-					else if(worldY <= Utils.GenerateStoneHeight(worldX,worldZ))
+
+					// Place bedrock at height 0
+					if (worldY == 0)
+						chunkData[x, y, z] = new Block( Block.BlockType.BEDROCK, pos,
+										chunk.gameObject, this );
+					// Place Diamond, Redstone or Stone at certain heights and probabilities
+					else if (worldY <= Utils.GenerateStoneHeight( worldX, worldZ ))
 					{
 						if (Utils.fBM3D( worldX, worldY, worldZ, 0.01f, 2 ) < 0.4f && worldY < 40)
 							chunkData[x, y, z] = new Block( Block.BlockType.DIAMOND, pos,
@@ -168,34 +170,37 @@ public class Chunk
 							chunkData[x, y, z] = new Block( Block.BlockType.REDSTONE, pos,
 										chunk.gameObject, this );
 						else
-							chunkData[x, y, z] = new Block( Block.BlockType.LAVA, pos,
-										  chunk.gameObject, this );
-						 //chunkData[x,y,z] = new Block(Block.BlockType.STONE, pos, 
-						 //               chunk.gameObject, this);
+							chunkData[x, y, z] = new Block( Block.BlockType.STONE, pos,
+										   chunk.gameObject, this );
 					}
 					// Place trunks of a tree or grass blocks on the surface
-					else if(worldY == surfaceHeight)
+					else if (worldY == surfaceHeight)
 					{
-						if(Utils.fBM3D(worldX, worldY, worldZ, 0.4f, 2) < 0.4f)
-							chunkData[x,y,z] = new Block(Block.BlockType.WOODBASE, pos, 
-						                chunk.gameObject, this);
+						if (Utils.fBM3D( worldX, worldY, worldZ, 0.4f, 2 ) < 0.4f)
+							chunkData[x, y, z] = new Block( Block.BlockType.WOODBASE, pos,
+										chunk.gameObject, this );
 						else
-							chunkData[x,y,z] = new Block(Block.BlockType.GRASS, pos, 
-						                chunk.gameObject, this);
+							chunkData[x, y, z] = new Block( Block.BlockType.GRASS, pos,
+										chunk.gameObject, this );
 					}
-                    // Place dirt blocks
-					else if(worldY < surfaceHeight)
-						chunkData[x,y,z] = new Block(Block.BlockType.DIRT, pos, 
-						                chunk.gameObject, this);
-                    // Place water blocks below height 65
-					else if(worldY < 65)
-						chunkData[x,y,z] = new Block(Block.BlockType.WATER, pos, 
-						                fluid.gameObject, this);
-                    // Place air blocks
+					else if (worldY == surfaceHeight + 1 && UnityEngine.Random.Range(0,100)>90) 
+					{
+						chunkData[x, y, z] = new Block( Block.BlockType.FLOWER, pos,
+											chunk.gameObject, this );
+					}
+					// Place dirt blocks
+					else if (worldY < surfaceHeight)
+						chunkData[x, y, z] = new Block( Block.BlockType.DIRT, pos,
+										chunk.gameObject, this );
+					// Place water blocks below height 65
+					else if (worldY < 65)
+						chunkData[x, y, z] = new Block( Block.BlockType.WATER, pos,
+										fluid.gameObject, this );
+					// Place air blocks
 					else
 					{
-						chunkData[x,y,z] = new Block(Block.BlockType.AIR, pos, 
-						                chunk.gameObject, this);
+						chunkData[x, y, z] = new Block( Block.BlockType.AIR, pos,
+										chunk.gameObject, this );
 					}
 
                     // Create caves
@@ -218,6 +223,9 @@ public class Chunk
 		GameObject.DestroyImmediate(fluid.GetComponent<MeshFilter>());
 		GameObject.DestroyImmediate(fluid.GetComponent<MeshRenderer>());
 		GameObject.DestroyImmediate(fluid.GetComponent<Collider>());
+		GameObject.DestroyImmediate( flower.GetComponent<MeshFilter>() );
+		GameObject.DestroyImmediate( flower.GetComponent<MeshRenderer>() );
+		GameObject.DestroyImmediate( flower.GetComponent<Collider>() );
 		DrawChunk();
 	}
 
@@ -251,6 +259,9 @@ public class Chunk
 
         // Prepare transparent chunk mesh
 		CombineQuads(fluid.gameObject, fluidMaterial);
+
+		// Prepare flower chunk mesh
+		CombineQuads( flower.gameObject, flowerMaterial );
 
 		status = ChunkStatus.DONE;
 	}
@@ -309,18 +320,23 @@ public class Chunk
     /// <param name="position">Position of the chunk</param>
     /// <param name="c">The material for the solid blocks of the chunk</param>
     /// <param name="t">The material for the transparent blocks of the chunk</param>
-	public Chunk (Vector3 position, Material c, Material t)
+	public Chunk (Vector3 position, Material c, Material t, Material f)
     {
         // Create GameObjects holding the chunk's meshes
 		chunk = new GameObject(World.BuildChunkName(position));         // solid chunk mesh, e.g. dirt blocks
 		chunk.transform.position = position;
 		fluid = new GameObject(World.BuildChunkName(position)+"_F");    // transparent chunk mesh, e.g. water blocks
 		fluid.transform.position = position;
+		flower = new GameObject( World.BuildChunkName( position ) + "_Flo" );    // transparent chunk mesh, e.g. water blocks
+		flower.transform.position = position;
 
 		mb = chunk.AddComponent<ChunkMB>();                             // Adds the chunk's Monobehaviour
 		mb.SetOwner(this);
+		var mb2 = flower.AddComponent<ChunkMB>();
+		mb2.SetOwner( this );
 		cubeMaterial = c;
 		fluidMaterial = t;
+		flowerMaterial = f;
 		BuildChunk();                                                   // Start building the chunk
 	}
 	

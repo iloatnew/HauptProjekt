@@ -18,6 +18,12 @@ public class Utils
 		return (int) height;
 	}
 
+	public static float GenerateHeightFloat( float x, float z, float min, float max )
+	{
+		float height = Map( min, max, 0, 1, fBM( x , z , octaves, persistence ) );
+		return height;
+	}
+
 	public static int GenerateHeight(float x, float z)
 	{
 		float height = Map(0, maxHeight, 0, 1, fBM(x * smooth, z * smooth, octaves, persistence));
