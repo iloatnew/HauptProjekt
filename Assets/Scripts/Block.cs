@@ -411,7 +411,7 @@ public class Block
 			float realX = worldX + vertic.x;
 			float realZ = worldZ + vertic.z;
 			
-			float realY = Utils.GenerateHeightFloat( realX, realZ, -0.5f, 0.5f );
+			float realY = Utils.GenerateHeightFloat( realX, realZ, 0, 150 ) - Utils.GenerateHeight(worldX, worldZ);
 			smoothedVertices[i] = new Vector3( vertic.x, realY, vertic.z );
 			i++;
 		}

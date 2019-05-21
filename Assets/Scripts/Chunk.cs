@@ -155,7 +155,7 @@ public class Chunk
 					}
 
 					int surfaceHeight = Utils.GenerateHeight(worldX,worldZ);
-
+                    float surfaceHeightFloat = Utils.GenerateHeightFloat(worldX, worldZ, 0, 150);
 					// Place bedrock at height 0
 					if (worldY == 0)
 						chunkData[x, y, z] = new Block( Block.BlockType.BEDROCK, pos,
@@ -173,24 +173,24 @@ public class Chunk
 							chunkData[x, y, z] = new Block( Block.BlockType.STONE, pos,
 										   chunk.gameObject, this );
 					}
-					// Place trunks of a tree or grass blocks on the surface
-					else if (worldY == surfaceHeight)
-					{
-						if (Utils.fBM3D( worldX, worldY, worldZ, 0.4f, 2 ) < 0.4f)
-							chunkData[x, y, z] = new Block( Block.BlockType.WOODBASE, pos,
-										chunk.gameObject, this );
-						else
+                    // Place trunks of a tree or grass blocks on the surface
+                    else if (worldY == surfaceHeight )
+                    {
+						//if (Utils.fBM3D( worldX, worldY, worldZ, 0.4f, 2 ) < 0.4f)
+						//	chunkData[x, y, z] = new Block( Block.BlockType.WOODBASE, pos,
+						//				chunk.gameObject, this );
+						//else
 							chunkData[x, y, z] = new Block( Block.BlockType.GRASS, pos,
 										chunk.gameObject, this );
 					}
-					else if (worldY == surfaceHeight + 1 && UnityEngine.Random.Range(0,100)>90) 
-					{
-						chunkData[x, y, z] = new Block( Block.BlockType.FLOWER, pos,
-											chunk.gameObject, this );
-					}
-					// Place dirt blocks
-					else if (worldY < surfaceHeight)
-						chunkData[x, y, z] = new Block( Block.BlockType.DIRT, pos,
+					//else if (worldY == surfaceHeight + 1 && UnityEngine.Random.Range(0,100)>90) 
+					//{
+					//	chunkData[x, y, z] = new Block( Block.BlockType.FLOWER, pos,
+					//						chunk.gameObject, this );
+					//}
+                    // Place dirt blocks
+                    else if (worldY < surfaceHeight)
+                        chunkData[x, y, z] = new Block( Block.BlockType.DIRT, pos,
 										chunk.gameObject, this );
 					// Place water blocks below height 65
 					else if (worldY < 65)

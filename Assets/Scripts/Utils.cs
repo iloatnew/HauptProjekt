@@ -15,12 +15,12 @@ public class Utils
 	public static int GenerateStoneHeight(float x, float z)
 	{
 		float height = Map(0, maxHeight - 5, 0, 1, fBM(x * smooth * 2, z * smooth * 2, octaves + 1, persistence));
-		return (int) height;
+        return (int) height;
 	}
 
 	public static float GenerateHeightFloat( float x, float z, float min, float max )
 	{
-		float height = Map( min, max, 0, 1, fBM( x , z , octaves, persistence ) );
+		float height = Map( min, max, 0, 1, fBM( x*smooth , z * smooth, octaves, persistence ) );
 		return height;
 	}
 
