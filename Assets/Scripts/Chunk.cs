@@ -120,9 +120,9 @@ public class Chunk
 				{
 					if(chunkData[x,y,z].blockType == Block.BlockType.SAND)
 					{
-						mb.StartCoroutine(mb.Drop(chunkData[x,y,z], 
-										Block.BlockType.SAND, 
-										20));
+						//mb.StartCoroutine(mb.Drop(chunkData[x,y,z], 
+						//				Block.BlockType.SAND, 
+						//				20));
 					}
 				}
 	}
@@ -180,8 +180,11 @@ public class Chunk
 						//	chunkData[x, y, z] = new Block( Block.BlockType.WOODBASE, pos,
 						//				chunk.gameObject, this );
 						//else
-							chunkData[x, y, z] = new Block( Block.BlockType.GRASS, pos,
+						{ 
+							chunkData[x, y, z] = new Block( Block.BlockType.SAND, pos,
 										chunk.gameObject, this );
+							chunkData[x, y, z].onSurface = true;
+						}
 					}
 					//else if (worldY == surfaceHeight + 1 && UnityEngine.Random.Range(0,100)>90) 
 					//{
@@ -332,6 +335,7 @@ public class Chunk
 
 		mb = chunk.AddComponent<ChunkMB>();                             // Adds the chunk's Monobehaviour
 		mb.SetOwner(this);
+		chunk.tag = "Chunk";
 		var mb2 = flower.AddComponent<ChunkMB>();
 		mb2.SetOwner( this );
 		cubeMaterial = c;

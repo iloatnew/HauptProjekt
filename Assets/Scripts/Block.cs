@@ -14,7 +14,7 @@ public class Block
 
 	public BlockType blockType;
 	public bool isSolid;
-	public bool isFlower;
+	public bool onSurface;
 	public Chunk owner;
 	GameObject parent;
 	public Vector3 position;
@@ -97,7 +97,6 @@ public class Block
 			isSolid = true;
 		if (blockType == BlockType.FLOWER)
 		{
-			isFlower = true;
 			parent = owner.flower.gameObject;
 		}
 		else if (blockType == BlockType.WATER)
@@ -130,23 +129,23 @@ public class Block
 	public bool BuildBlock(BlockType b)
 	{
         // If water or sand got placed, activate the drop and flow coroutines respectively.
-		if(b == BlockType.WATER)
-		{
-			owner.mb.StartCoroutine(owner.mb.Flow(this, 
-										BlockType.WATER, 
-										blockHealthMax[(int)BlockType.WATER],15));
-		}
-		else if(b == BlockType.SAND)
-		{
-			owner.mb.StartCoroutine(owner.mb.Drop(this, 
-										BlockType.SAND, 
-										20));
-		}
-		else
-		{
+		//if(b == BlockType.WATER)
+		//{
+		//	owner.mb.StartCoroutine(owner.mb.Flow(this,
+		//								BlockType.WATER,
+		//								blockHealthMax[(int)BlockType.WATER], 15));
+		//}
+		//else if(b == BlockType.SAND)
+		//{
+		//	owner.mb.StartCoroutine(owner.mb.Drop(this,
+		//								BlockType.SAND,
+		//								20));
+		//}
+		//else
+		//{
 			SetType(b);
 			owner.Redraw();
-		}
+		//}
 		return true;
 	}
 
@@ -203,15 +202,15 @@ public class Block
 
 		// All possible vertices 
 		// Top vertices
-		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f )/2; //p3
-		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f ) / 2;  //p0
-		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f ) / 2; //p7
-		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f ) / 2; //p4
+		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f )/3; //p3
+		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f ) / 3;  //p0
+		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f ) / 3; //p7
+		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f ) / 3; //p4
 		// Bottom vertices
-		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f ) / 2; //p2
-		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f ) / 2; //p1
-		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f ) / 2;
-		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f ) / 2; //p5
+		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f ) / 3; //p2
+		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f ) / 3; //p1
+		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f ) / 3;
+		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f ) / 3; //p5
 
 		switch (side)
 		{
@@ -254,7 +253,11 @@ public class Block
 		mesh.RecalculateBounds();
 	
 		GameObject quad = new GameObject( "Quad" );
-		quad.transform.position = position;
+		int worldX = (int)(position.x + parent.transform.position.x);
+		int worldZ = (int)(position.z + parent.transform.position.z);
+		
+		var y = Utils.GenerateHeightFloat(worldX, worldZ, 0, 1);
+		quad.transform.position = new Vector3(position.x, y, position.z);
 		quad.transform.parent = this.parent.transform;
 
 		MeshFilter meshFilter = (MeshFilter)quad.AddComponent( typeof( MeshFilter ) );
@@ -324,7 +327,7 @@ public class Block
 		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f );
 
 		Vector3[] smoothedTops = SmoothingTop( new Vector3[] { p4, p5, p6, p7 });
-		if (blockType == BlockType.GRASS)
+		if (onSurface)
 		{
 			p4 = smoothedTops[0];
 			p5 = smoothedTops[1];

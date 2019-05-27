@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +10,8 @@ public class ChunkMB: MonoBehaviour
 {
 	Chunk owner;
 	public ChunkMB(){}
-
+	private Vector3 effectPosition;
+	private bool update;
     /// <summary>
     /// Assigns the reference to the chunk who possesses this MonoBehavior.
     /// </summary>
@@ -46,24 +49,27 @@ public class ChunkMB: MonoBehaviour
 	{
 		Block thisBlock = b;
 		Block prevBlock = null;
-		for(int i = 0; i < maxDrop; i++)
+		for (int i = 0; i < maxDrop; i++)
 		{
-			Block.BlockType previousType = thisBlock.blockType;
-			if(previousType != bt)
-				thisBlock.SetType(bt);
-			if(prevBlock != null)
-				prevBlock.SetType(previousType);
+			if(thisBlock!=null)
+			{ 
+				Block.BlockType previousType = thisBlock.blockType;
+				if (previousType != bt)
+					thisBlock.SetType(bt);
+				if (prevBlock != null)
+					prevBlock.SetType(previousType);
 
-			prevBlock = thisBlock;
-			b.owner.Redraw();
-			
-			yield return new WaitForSeconds(0.2f);
-			Vector3 pos = thisBlock.position;
-			
-			thisBlock = thisBlock.GetBlock((int)pos.x,(int)pos.y-1,(int)pos.z);
-			if(thisBlock.isSolid)
-			{	
-				yield break;
+				prevBlock = thisBlock;
+				b.owner.Redraw();
+
+				yield return new WaitForSeconds(0.2f);
+				Vector3 pos = thisBlock.position;
+				thisBlock = thisBlock.GetBlock((int)pos.x, (int)pos.y - 1, (int)pos.z);
+				if(thisBlock != null)
+					if (thisBlock.isSolid)
+					{
+						yield break;
+					}
 			}
 		}
 	}
@@ -131,5 +137,77 @@ public class ChunkMB: MonoBehaviour
 			owner.Save();
 			owner.changed = false;
 		}
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		effectPosition = other.transform.position;
+		Block block = World.GetWorldBlock(effectPosition);
+		if (block.blockType == Block.BlockType.AIR) return;
+		Destroy(other.gameObject);
+		this.update = true;
+	}	
+
+	private void Update()
+	{
+		if (update) 
+		{
+			update = false;
+			Block block = World.GetWorldBlock(effectPosition);
+			Debug.Log(block.blockType);
+			Chunk hitc = block.owner;
+			Block.BlockType newType;
+			switch (block.blockType)
+			{
+				case Block.BlockType.SAND:
+					newType = Block.BlockType.DIRT;
+					break;
+				case Block.BlockType.DIRT:
+					newType = Block.BlockType.GRASS;
+					break;
+				case Block.BlockType.GRASS:
+					newType = Block.BlockType.FLOWER;
+					block = block.GetBlock((int)block.position.x, (int)(block.position.y +1), (int)block.position.z);
+					break;
+				default:
+					newType = block.blockType;
+					break;
+			}
+
+			bool updateBuild = block.BuildBlock(newType);
+
+			if (updateBuild)
+			{
+				hitc.changed = true;
+				List<string> updates = new List<string>();
+				float thisChunkx = hitc.chunk.transform.position.x;
+				float thisChunky = hitc.chunk.transform.position.y;
+				float thisChunkz = hitc.chunk.transform.position.z;
+
+				// Update affected neighbours
+				if (block.position.x == 0)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx - World.chunkSize, thisChunky, thisChunkz)));
+				if (block.position.x == World.chunkSize - 1)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx + World.chunkSize, thisChunky, thisChunkz)));
+				if (block.position.y == 0)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx, thisChunky - World.chunkSize, thisChunkz)));
+				if (block.position.y == World.chunkSize - 1)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx, thisChunky + World.chunkSize, thisChunkz)));
+				if (block.position.z == 0)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx, thisChunky, thisChunkz - World.chunkSize)));
+				if (block.position.z == World.chunkSize - 1)
+					updates.Add(World.BuildChunkName(new Vector3(thisChunkx, thisChunky, thisChunkz + World.chunkSize)));
+
+				foreach (string cname in updates)
+				{
+					Chunk c;
+					if (World.chunks.TryGetValue(cname, out c))
+					{
+						c.Redraw();
+					}
+				}
+			}
+		}
+		
 	}
 }
