@@ -120,9 +120,9 @@ public class Chunk
 				{
 					if(chunkData[x,y,z].blockType == Block.BlockType.SAND)
 					{
-						//mb.StartCoroutine(mb.Drop(chunkData[x,y,z], 
-						//				Block.BlockType.SAND, 
-						//				20));
+						mb.StartCoroutine(mb.Drop(chunkData[x, y, z],
+										Block.BlockType.SAND,
+										20));
 					}
 				}
 	}
@@ -181,7 +181,7 @@ public class Chunk
 						//				chunk.gameObject, this );
 						//else
 						{ 
-							chunkData[x, y, z] = new Block( Block.BlockType.SAND, pos,
+							chunkData[x, y, z] = new Block( Block.BlockType.GRASS, pos,
 										chunk.gameObject, this );
 							chunkData[x, y, z].onSurface = true;
 						}
@@ -207,9 +207,9 @@ public class Chunk
 					}
 
                     // Create caves
-					if(chunkData[x,y,z].blockType != Block.BlockType.WATER && Utils.fBM3D(worldX, worldY, worldZ, 0.1f, 3) < 0.42f)
-						chunkData[x,y,z] = new Block(Block.BlockType.AIR, pos, 
-						                chunk.gameObject, this);
+					//if(chunkData[x,y,z].blockType != Block.BlockType.WATER && Utils.fBM3D(worldX, worldY, worldZ, 0.1f, 3) < 0.42f)
+					//	chunkData[x,y,z] = new Block(Block.BlockType.AIR, pos, 
+					//	                chunk.gameObject, this);
 
 					status = ChunkStatus.DRAW;
 				}

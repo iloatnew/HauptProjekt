@@ -30,16 +30,23 @@ public class Utils
 		return (int) height;
 	}
 
-    /// <summary>
-    /// 3D Fractional Brownian Motion
-    /// </summary>
-    /// <param name="x">x position</param>
-    /// <param name="y">y position</param>
-    /// <param name="z">z position</param>
-    /// <param name="sm"></param>
-    /// <param name="oct"></param>
-    /// <returns></returns>
-    public static float fBM3D(float x, float y, float z, float sm, int oct)
+	public static Vector3 GenerateFlower(int i)
+	{
+		float x = Map(0, 1, 0, 1, fBM(i * 0.1f, 1 * 0.1f, octaves, persistence));
+		float y = Map(0, 1, 0, 1, fBM(i * 0.1f, 2 * 0.1f, octaves, persistence));
+		float z = Map(0, 1, 0, 1, fBM(i * 0.1f, 3 * 0.1f, octaves, persistence));
+		return new Vector3(x,y,z);
+	}
+	/// <summary>
+	/// 3D Fractional Brownian Motion
+	/// </summary>
+	/// <param name="x">x position</param>
+	/// <param name="y">y position</param>
+	/// <param name="z">z position</param>
+	/// <param name="sm"></param>
+	/// <param name="oct"></param>
+	/// <returns></returns>
+	public static float fBM3D(float x, float y, float z, float sm, int oct)
     {
         float XY = fBM(x * sm, y * sm, oct, 0.5f);
         float YZ = fBM(y * sm, z * sm, oct, 0.5f);

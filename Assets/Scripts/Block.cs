@@ -18,7 +18,8 @@ public class Block
 	public Chunk owner;
 	GameObject parent;
 	public Vector3 position;
-
+	public int numberFlowers;
+	public bool refreshFlowers;
 	public BlockType health;
 	public int currentHealth;
 	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -128,24 +129,24 @@ public class Block
     /// <returns>Returns always true after updating the chunk.</returns>
 	public bool BuildBlock(BlockType b)
 	{
-        // If water or sand got placed, activate the drop and flow coroutines respectively.
-		//if(b == BlockType.WATER)
-		//{
-		//	owner.mb.StartCoroutine(owner.mb.Flow(this,
-		//								BlockType.WATER,
-		//								blockHealthMax[(int)BlockType.WATER], 15));
-		//}
-		//else if(b == BlockType.SAND)
-		//{
-		//	owner.mb.StartCoroutine(owner.mb.Drop(this,
-		//								BlockType.SAND,
-		//								20));
-		//}
-		//else
-		//{
+		// If water or sand got placed, activate the drop and flow coroutines respectively.
+		if (b == BlockType.WATER)
+		{
+			owner.mb.StartCoroutine(owner.mb.Flow(this,
+										BlockType.WATER,
+										blockHealthMax[(int)BlockType.WATER], 15));
+		}
+		else if (b == BlockType.SAND || b == BlockType.FLOWER)
+		{
+			owner.mb.StartCoroutine(owner.mb.Drop(this,
+										b,
+										20));
+		}
+		else
+		{
 			SetType(b);
 			owner.Redraw();
-		//}
+		}
 		return true;
 	}
 
@@ -177,7 +178,7 @@ public class Block
 		owner.Redraw();
 		return false;
 	}
-	private void CreatFlower( Cubeside side )
+	private void CreatFlower( Cubeside side, float size, Vector3 pos )
 	{
 		Mesh mesh = new Mesh();
 		mesh.name = "ScriptedMesh" + side.ToString();
@@ -202,15 +203,15 @@ public class Block
 
 		// All possible vertices 
 		// Top vertices
-		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f )/3; //p3
-		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f ) / 3;  //p0
-		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f ) / 3; //p7
-		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f ) / 3; //p4
+		Vector3 p0 = new Vector3( -0.5f, -0.5f, 0.5f ) * size + pos; //p3
+		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f) * size + pos;  //p0
+		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f) * size + pos; //p7
+		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f) * size + pos; //p4
 		// Bottom vertices
-		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f ) / 3; //p2
-		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f ) / 3; //p1
-		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f ) / 3;
-		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f ) / 3; //p5
+		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f) * size + pos; //p2
+		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f) * size + pos; //p1
+		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f) * size + pos;
+		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f) * size + pos; //p5
 
 		switch (side)
 		{
@@ -253,11 +254,12 @@ public class Block
 		mesh.RecalculateBounds();
 	
 		GameObject quad = new GameObject( "Quad" );
-		int worldX = (int)(position.x + parent.transform.position.x);
-		int worldZ = (int)(position.z + parent.transform.position.z);
-		
-		var y = Utils.GenerateHeightFloat(worldX, worldZ, 0, 1);
-		quad.transform.position = new Vector3(position.x, y, position.z);
+		//int worldX = (int)(position.x + parent.transform.position.x);
+		//int worldZ = (int)(position.z + parent.transform.position.z);
+
+		//var y = Utils.GenerateHeightFloat(worldX, worldZ, 0, 1);
+		//quad.transform.position = new Vector3(position.x, y, position.z);
+		quad.transform.position = new Vector3(position.x, position.y, position.z);
 		quad.transform.parent = this.parent.transform;
 
 		MeshFilter meshFilter = (MeshFilter)quad.AddComponent( typeof( MeshFilter ) );
@@ -525,11 +527,9 @@ public class Block
 	{
 		if(blockType == BlockType.AIR) return;
 		// flowers are built in cross not cube
-		if (blockType == BlockType.FLOWER) { 
-			CreatFlower( Cubeside.DIAGONALLEFT ); 
-			CreatFlower( Cubeside.DIAGONALRIGHT );
-			CreatFlower( Cubeside.DIAGONALFRONT );
-			CreatFlower( Cubeside.DIAGONALBACK ); 
+		if (blockType == BlockType.FLOWER) {
+			isSolid = false;
+			BuildFlowers();
 			return; }
 		// Solid or same neighbour
 		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z + 1))
@@ -546,5 +546,16 @@ public class Block
 			CreateQuad(Cubeside.RIGHT);
 	}
 
-	
+	private void BuildFlowers()
+	{
+		for (int i = 0; i < numberFlowers; i++)
+		{
+			var pos = Utils.GenerateFlower(i);
+			CreatFlower(Cubeside.DIAGONALLEFT, 1, pos);
+			CreatFlower(Cubeside.DIAGONALRIGHT, 1, pos);
+			CreatFlower(Cubeside.DIAGONALFRONT, 1, pos);
+			CreatFlower(Cubeside.DIAGONALBACK, 1, pos);
+
+		}
+	}
 }
