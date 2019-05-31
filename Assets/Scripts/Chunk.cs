@@ -186,13 +186,14 @@ public class Chunk
 							chunkData[x, y, z].onSurface = true;
 						}
 					}
-					//else if (worldY == surfaceHeight + 1 && UnityEngine.Random.Range(0,100)>90) 
-					//{
-					//	chunkData[x, y, z] = new Block( Block.BlockType.FLOWER, pos,
-					//						chunk.gameObject, this );
-					//}
-                    // Place dirt blocks
-                    else if (worldY < surfaceHeight)
+					else if (worldY == surfaceHeight + 1)
+					{
+						chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
+											chunk.gameObject, this);
+						chunkData[x, y, z].aboveSurface = true;
+					}
+					// Place dirt blocks
+					else if (worldY < surfaceHeight)
                         chunkData[x, y, z] = new Block( Block.BlockType.DIRT, pos,
 										chunk.gameObject, this );
 					// Place water blocks below height 65

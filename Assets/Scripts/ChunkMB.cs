@@ -165,10 +165,10 @@ public class ChunkMB: MonoBehaviour
 				case Block.BlockType.DIRT:
 					newType = Block.BlockType.GRASS;
 					break;
-				case Block.BlockType.GRASS:
-					newType = Block.BlockType.FLOWER;
-					block = block.GetBlock((int)block.position.x, (int)(block.position.y +1), (int)block.position.z);
-					break;
+				//case Block.BlockType.GRASS:
+				//	newType = Block.BlockType.FLOWER;
+				//	block = block.GetBlock((int)block.position.x, (int)(block.position.y +1), (int)block.position.z);
+				//	break;
 				default:
 					newType = block.blockType;
 					break;

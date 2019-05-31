@@ -19,7 +19,7 @@ public class Block
 	GameObject parent;
 	public Vector3 position;
 	public int numberFlowers;
-	public bool refreshFlowers;
+	public bool aboveSurface;
 	public BlockType health;
 	public int currentHealth;
 	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -213,6 +213,8 @@ public class Block
 		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f) * size + pos;
 		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f) * size + pos; //p5
 
+		SmoothingTop(new Vector3[] { p0, p1, p2, p3, p4, p5, p6, p7 });
+
 		switch (side)
 		{
 			case Cubeside.DIAGONALLEFT:
@@ -327,16 +329,27 @@ public class Block
 		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f );
 		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f );
 		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f );
-
-		Vector3[] smoothedTops = SmoothingTop( new Vector3[] { p4, p5, p6, p7 });
 		if (onSurface)
 		{
+			Vector3[] smoothedTops = SmoothingTop( new Vector3[] { p4, p5, p6, p7 });
+		
 			p4 = smoothedTops[0];
 			p5 = smoothedTops[1];
 			p6 = smoothedTops[2];
 			p7 = smoothedTops[3];
 		}
-		switch(side)
+		//check if block above susrface
+
+		if (aboveSurface)
+		{
+			Vector3[] smoothedButtoms = SmoothingButtom(new Vector3[] { p0, p1, p2, p3 });
+			p0 = smoothedButtoms[0];
+			p1 = smoothedButtoms[1];
+			p2 = smoothedButtoms[2];
+			p3 = smoothedButtoms[3];
+
+		}
+		switch (side)
 		{
 			case Cubeside.BOTTOM:
 				vertices = new Vector3[] {p0, p1, p2, p3};
@@ -400,7 +413,8 @@ public class Block
 	}
 
 	/// <summary>
-	/// based on the worldX and worldZ value, return a RealY value between -0.5 and 0.5
+	/// based on the worldX and worldZ value, return a RealY value between 0 and 1
+	/// (GenerateHeight(int) cut off the float numbers after the point, the difference is the float number)
 	/// </summary>
 	/// <param name="vertices">4 top vertices</param>
 	/// <returns>Returns 4 modified top vertices.</returns>
@@ -417,7 +431,36 @@ public class Block
 			float realZ = worldZ + vertic.z;
 			
 			float realY = Utils.GenerateHeightFloat( realX, realZ, 0, 150 ) - Utils.GenerateHeight(worldX, worldZ);
+			//realY = realY % 1f;
+			//Debug.Log(realY);
 			smoothedVertices[i] = new Vector3( vertic.x, realY, vertic.z );
+			i++;
+		}
+		return smoothedVertices;
+	}
+
+	/// <summary>
+	/// based on the worldX and worldZ value, return a RealY value between ??
+	/// make the bottom of the block above surface fit with the top of surface
+	/// </summary>
+	/// <param name="vertices">4 bottom vertices</param>
+	/// <returns>Returns 4 modified top vertices.</returns>
+	private Vector3[] SmoothingButtom(Vector3[] vertices)
+	{
+		Vector3[] smoothedVertices = new Vector3[vertices.Length];
+		int worldX = (int)(position.x + parent.transform.position.x);
+		int worldY = (int)(position.y + parent.transform.position.y);
+		int worldZ = (int)(position.z + parent.transform.position.z);
+		int i = 0;
+		foreach (Vector3 vertic in vertices)
+		{
+			float realX = worldX + vertic.x;
+			float realZ = worldZ + vertic.z;
+
+			float realY = (Utils.GenerateHeightFloat(realX, realZ, 0, 150) - Utils.GenerateHeight(worldX, worldZ))-1;
+			//realY = realY % 1f;
+			//Debug.Log(realY);
+			smoothedVertices[i] = new Vector3(vertic.x, realY, vertic.z);
 			i++;
 		}
 		return smoothedVertices;
