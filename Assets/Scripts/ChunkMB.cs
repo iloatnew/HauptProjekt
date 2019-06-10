@@ -154,7 +154,6 @@ public class ChunkMB: MonoBehaviour
 		{
 			update = false;
 			Block block = World.GetWorldBlock(effectPosition);
-			Debug.Log(block.blockType);
 			Chunk hitc = block.owner;
 			Block.BlockType newType;
 			switch (block.blockType)

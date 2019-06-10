@@ -285,7 +285,10 @@ MonoBehaviour:
   player: {fileID: 365632362}
   textureAtlas: {fileID: 2100000, guid: 0beff685461bd4744bc433ab1599a347, type: 2}
   fluidTexture: {fileID: 2100000, guid: 033d6ae81142c4d80828ae3712a04408, type: 2}
-  flower: {fileID: 2100000, guid: 9012713f1f448a140a49264fb41457b0, type: 2}
+  textures:
+  - {fileID: 2100000, guid: bcc81c2a4dda84145a3f4e8dd720d682, type: 2}
+  - {fileID: 2100000, guid: d9e5dbace7dad05408af9dc9c67d1eff, type: 2}
+  - {fileID: 2100000, guid: 4409a45a4fa83b940bdb918c28d91344, type: 2}
   lastbuildPos: {x: 0, y: 0, z: 0}
 --- !u!4 &556296020
 Transform:
@@ -394,7 +397,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9012713f1f448a140a49264fb41457b0, type: 2}
+  - {fileID: 2100000, guid: bcc81c2a4dda84145a3f4e8dd720d682, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

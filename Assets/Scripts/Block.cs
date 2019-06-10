@@ -23,8 +23,11 @@ public class Block
 	public BlockType health;
 	public int currentHealth;
 	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
+	int worldX;
+	int worldY;
+	int worldZ;
 
-    // Hard-coded UVs based on blockuvs.txt
+	// Hard-coded UVs based on blockuvs.txt
 	Vector2[,] blockUVs = { 
 		/*GRASS TOP*/		{new Vector2( 0.125f, 0.375f ), new Vector2( 0.1875f, 0.375f),
 								new Vector2( 0.125f, 0.4375f ),new Vector2( 0.1875f, 0.4375f )},
@@ -82,6 +85,9 @@ public class Block
 		parent = p;
 		position = pos;
 		SetType(blockType);
+		worldX = (int)(position.x + parent.transform.position.x);
+		worldY = (int)(position.y + parent.transform.position.y);
+		worldZ = (int)(position.z + parent.transform.position.z);
 	}
 
     /// <summary>
@@ -194,10 +200,10 @@ public class Block
 		Vector2 uv10;
 		Vector2 uv01;
 		Vector2 uv11;
-		uv00 = blockUVs[(int)(blockType + 1), 0];
-		uv10 = blockUVs[(int)(blockType + 1), 1];
-		uv01 = blockUVs[(int)(blockType + 1), 2];
-		uv11 = blockUVs[(int)(blockType + 1), 3];
+		uv00 = blockUVs[(int)(BlockType.FLOWER + 1), 0];
+		uv10 = blockUVs[(int)(BlockType.FLOWER + 1), 1];
+		uv01 = blockUVs[(int)(BlockType.FLOWER + 1), 2];
+		uv11 = blockUVs[(int)(BlockType.FLOWER + 1), 3];
 		
 		//{uv11, uv01, uv00, uv10};
 
@@ -213,7 +219,11 @@ public class Block
 		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f) * size + pos;
 		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f) * size + pos; //p5
 
-		SmoothingTop(new Vector3[] { p0, p1, p2, p3, p4, p5, p6, p7 });
+		Vector3[] smoothedButtoms = SmoothingBottom(new Vector3[] { p0, p1, p2, p3 });
+		p0 = smoothedButtoms[0];
+		p1 = smoothedButtoms[1];
+		p2 = smoothedButtoms[2];
+		p3 = smoothedButtoms[3];
 
 		switch (side)
 		{
@@ -288,7 +298,7 @@ public class Block
 		Vector2 uv01;
 		Vector2 uv11;
 
-		if (blockType == BlockType.GRASS && side == Cubeside.TOP)
+		if (blockType == BlockType.GRASS && (side == Cubeside.TOP))
 		{
 			uv00 = blockUVs[0, 0];
 			uv10 = blockUVs[0, 1];
@@ -324,11 +334,13 @@ public class Block
 		Vector3 p1 = new Vector3( 0.5f, -0.5f, 0.5f );
 		Vector3 p2 = new Vector3( 0.5f, -0.5f, -0.5f );
 		Vector3 p3 = new Vector3( -0.5f, -0.5f, -0.5f );
+
 		// Bottom vertices
 		Vector3 p4 = new Vector3( -0.5f, 0.5f, 0.5f );
 		Vector3 p5 = new Vector3( 0.5f, 0.5f, 0.5f );
 		Vector3 p6 = new Vector3( 0.5f, 0.5f, -0.5f );
 		Vector3 p7 = new Vector3( -0.5f, 0.5f, -0.5f );
+		
 		if (onSurface)
 		{
 			Vector3[] smoothedTops = SmoothingTop( new Vector3[] { p4, p5, p6, p7 });
@@ -342,7 +354,7 @@ public class Block
 
 		if (aboveSurface)
 		{
-			Vector3[] smoothedButtoms = SmoothingButtom(new Vector3[] { p0, p1, p2, p3 });
+			Vector3[] smoothedButtoms = SmoothingBottom(new Vector3[] { p0, p1, p2, p3 });
 			p0 = smoothedButtoms[0];
 			p1 = smoothedButtoms[1];
 			p2 = smoothedButtoms[2];
@@ -421,9 +433,6 @@ public class Block
 	private Vector3[] SmoothingTop( Vector3[] vertices )
 	{
 		Vector3[] smoothedVertices = new Vector3[vertices.Length];
-		int worldX = (int)(position.x + parent.transform.position.x);
-		int worldY = (int)(position.y + parent.transform.position.y);
-		int worldZ = (int)(position.z + parent.transform.position.z);
 		int i = 0;
 		foreach (Vector3 vertic in vertices) 
 		{
@@ -445,12 +454,10 @@ public class Block
 	/// </summary>
 	/// <param name="vertices">4 bottom vertices</param>
 	/// <returns>Returns 4 modified top vertices.</returns>
-	private Vector3[] SmoothingButtom(Vector3[] vertices)
+	private Vector3[] SmoothingBottom(Vector3[] vertices)
 	{
 		Vector3[] smoothedVertices = new Vector3[vertices.Length];
-		int worldX = (int)(position.x + parent.transform.position.x);
-		int worldY = (int)(position.y + parent.transform.position.y);
-		int worldZ = (int)(position.z + parent.transform.position.z);
+		
 		int i = 0;
 		foreach (Vector3 vertic in vertices)
 		{
@@ -571,21 +578,22 @@ public class Block
 		if(blockType == BlockType.AIR) return;
 		// flowers are built in cross not cube
 		if (blockType == BlockType.FLOWER) {
-			isSolid = false;
 			BuildFlowers();
-			return; }
+			return;
+		}
 		// Solid or same neighbour
-		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z + 1))
+		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z + 1)  || aboveSurface || onSurface)
 			CreateQuad(Cubeside.FRONT);
-		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z - 1))
+		if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z - 1) || aboveSurface || onSurface)
 			CreateQuad(Cubeside.BACK);
-		if(!HasSolidNeighbour((int)position.x,(int)position.y + 1,(int)position.z))
+		if(!HasSolidNeighbour((int)position.x,(int)position.y + 1,(int)position.z) || aboveSurface || onSurface){ 
 			CreateQuad(Cubeside.TOP);
-		if(!HasSolidNeighbour((int)position.x,(int)position.y - 1,(int)position.z))
+		}
+		if (!HasSolidNeighbour((int)position.x,(int)position.y - 1,(int)position.z) || aboveSurface || onSurface)
 			CreateQuad(Cubeside.BOTTOM);
-		if(!HasSolidNeighbour((int)position.x - 1,(int)position.y,(int)position.z))
+		if(!HasSolidNeighbour((int)position.x - 1,(int)position.y,(int)position.z) || aboveSurface || onSurface)
 			CreateQuad(Cubeside.LEFT);
-		if(!HasSolidNeighbour((int)position.x + 1,(int)position.y,(int)position.z))
+		if(!HasSolidNeighbour((int)position.x + 1,(int)position.y,(int)position.z) || aboveSurface || onSurface)
 			CreateQuad(Cubeside.RIGHT);
 	}
 
@@ -593,12 +601,14 @@ public class Block
 	{
 		for (int i = 0; i < numberFlowers; i++)
 		{
-			var pos = Utils.GenerateFlower(i);
-			CreatFlower(Cubeside.DIAGONALLEFT, 1, pos);
-			CreatFlower(Cubeside.DIAGONALRIGHT, 1, pos);
-			CreatFlower(Cubeside.DIAGONALFRONT, 1, pos);
-			CreatFlower(Cubeside.DIAGONALBACK, 1, pos);
+			var pos = Utils.GenerateFlower(i) - new Vector3(0, -0.2f, 0);
+			var f = Utils.GenerateFlower(i).y;
+			CreatFlower(Cubeside.DIAGONALLEFT, f, pos);
+			CreatFlower(Cubeside.DIAGONALRIGHT, f, pos);
+			CreatFlower(Cubeside.DIAGONALFRONT, f, pos);
+			CreatFlower(Cubeside.DIAGONALBACK, f, pos);
 
 		}
+		
 	}
 }

@@ -37,6 +37,21 @@ public class Utils
 		float z = Map(0, 1, 0, 1, fBM(i * 0.1f, 3 * 0.1f, octaves, persistence));
 		return new Vector3(x,y,z);
 	}
+
+	//based on x,y,z determines the type of flower or grass
+	public static int GenerateFlowerType(float x, float y, float z)
+	{
+		var result = fBM3D(x, y, z, 0.01f, 2);
+		if (result > 0.45)
+			return 0;
+		else if (result > 0.4)
+			return 1;
+		else if (result > 0.37)
+			return 2;
+		else
+			return 3;
+
+	}
 	/// <summary>
 	/// 3D Fractional Brownian Motion
 	/// </summary>
