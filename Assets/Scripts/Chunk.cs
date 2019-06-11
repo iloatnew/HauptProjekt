@@ -40,7 +40,7 @@ public class Chunk
 {
 	public Material cubeMaterial;   // Materia for solid blocks
 	public Material fluidMaterial;  // Material for transparent blocks
-	public Material[] extraMaterials;
+	public Material extraMaterial;
 	public Block[,,] chunkData;     // 3D Array containing all blocks of the chunk
 	public GameObject chunk;        // GameObject that holds the mesh of the solid parts of the chunk
 	public GameObject fluid;        // GameObject that holds the mesh of the transparent parts, like water, of the chunk
@@ -175,15 +175,23 @@ public class Chunk
 					}
 					else if (worldY == surfaceHeight+1)
 					{
-						if (UnityEngine.Random.Range(0, 10) > 8f)
-							chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
-									chunk.gameObject, this);
-						else{ 
-							chunkData[x, y, z] = new Block(Block.BlockType.FLOWER, pos,
+                        var ran = UnityEngine.Random.Range(0, 10);
+
+                        if (ran > 8f)
+                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER1, pos,
+                                        chunk.gameObject, this);
+                        else if(ran > 6)
+							chunkData[x, y, z] = new Block(Block.BlockType.FLOWER2, pos,
 										chunk.gameObject, this);
-							chunkData[x, y, z].numberFlowers = chunkData[x, y, z].numberFlowers + 1;
-						}
-						chunkData[x, y, z].aboveSurface = true;
+                        else if (ran > 4)
+                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER3, pos,
+                                        chunk.gameObject, this);
+                        else
+                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
+                                        chunk.gameObject, this);
+
+                        chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(1,5);
+                        chunkData[x, y, z].aboveSurface = true;
 
 					}
 					// Place trunks of a tree or grass blocks on the surface
@@ -271,8 +279,7 @@ public class Chunk
 		int worldY = (int)(chunk.transform.position.y);
 		int worldZ = (int)(chunk.transform.position.z);
 
-		var type = Utils.GenerateFlowerType(worldX, worldY, worldZ);
-		CombineQuads(flower.gameObject, extraMaterials[type]);
+        CombineQuads(flower.gameObject, extraMaterial);
 		status = ChunkStatus.DONE;
 	}
 
@@ -330,7 +337,7 @@ public class Chunk
     /// <param name="position">Position of the chunk</param>
     /// <param name="c">The material for the solid blocks of the chunk</param>
     /// <param name="t">The material for the transparent blocks of the chunk</param>
-	public Chunk (Vector3 position, Material c, Material t, Material[] f)
+	public Chunk (Vector3 position, Material c, Material t, Material f)
     {
         // Create GameObjects holding the chunk's meshes
 		chunk = new GameObject(World.BuildChunkName(position));         // solid chunk mesh, e.g. dirt blocks
@@ -347,7 +354,7 @@ public class Chunk
 		mb2.SetOwner( this );
 		cubeMaterial = c;
 		fluidMaterial = t;
-		extraMaterials = f;
+		extraMaterial = f;
 		BuildChunk();                                                   // Start building the chunk
 	}
 	

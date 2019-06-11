@@ -30,7 +30,7 @@ public class BlockInteraction : MonoBehaviour
         if (Input.GetKeyDown("6"))
             buildtype = Block.BlockType.WATER;
 		if (Input.GetKeyDown("7"))
-			buildtype = Block.BlockType.FLOWER;
+			buildtype = Block.BlockType.FLOWER4;
 		if (Input.GetKeyDown(KeyCode.F))
 		{
 			Rain(Camera.main.transform.position + Camera.main.transform.forward * 2);
@@ -65,7 +65,7 @@ public class BlockInteraction : MonoBehaviour
 				}
 				else
 				{
-					if (buildtype == Block.BlockType.FLOWER) {
+					if (buildtype == Block.BlockType.FLOWER4) {
 						b.numberFlowers = b.numberFlowers + 1;
 					}
 					update = b.BuildBlock(buildtype);

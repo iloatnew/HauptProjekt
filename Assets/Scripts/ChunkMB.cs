@@ -51,7 +51,7 @@ public class ChunkMB: MonoBehaviour
 		Block prevBlock = null;
 		for (int i = 0; i < maxDrop; i++)
 		{
-			if(thisBlock!=null)
+            if (thisBlock!=null)
 			{ 
 				Block.BlockType previousType = thisBlock.blockType;
 				if (previousType != bt)
@@ -60,10 +60,12 @@ public class ChunkMB: MonoBehaviour
 					prevBlock.SetType(previousType);
 
 				prevBlock = thisBlock;
-				b.owner.Redraw();
+                
+                b.owner.Redraw();
 
 				yield return new WaitForSeconds(0.2f);
 				Vector3 pos = thisBlock.position;
+                
 				thisBlock = thisBlock.GetBlock((int)pos.x, (int)pos.y - 1, (int)pos.z);
 				if(thisBlock != null)
 					if (thisBlock.isSolid)

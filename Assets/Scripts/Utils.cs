@@ -32,9 +32,9 @@ public class Utils
 
 	public static Vector3 GenerateFlower(int i)
 	{
-		float x = Map(0, 1, 0, 1, fBM(i * 0.1f, 1 * 0.1f, octaves, persistence));
-		float y = Map(0, 1, 0, 1, fBM(i * 0.1f, 2 * 0.1f, octaves, persistence));
-		float z = Map(0, 1, 0, 1, fBM(i * 0.1f, 3 * 0.1f, octaves, persistence));
+        var x = -0.5f + i * 0.2f;
+        var y = 0f;
+        var z = -0.5f + i * 0.2f;
 		return new Vector3(x,y,z);
 	}
 
