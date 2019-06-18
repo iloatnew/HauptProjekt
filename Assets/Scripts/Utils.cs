@@ -11,7 +11,8 @@ public class Utils
 	static readonly float smooth = 0.01f;
 	static readonly int octaves = 4;
 	static readonly float persistence = 0.5f;
-
+	static bool gen = false;
+	static Vector3[] vects = new Vector3[20];
 	public static int GenerateStoneHeight(float x, float z)
 	{
 		float height = Map(0, maxHeight - 5, 0, 1, fBM(x * smooth * 2, z * smooth * 2, octaves + 1, persistence));
@@ -32,10 +33,8 @@ public class Utils
 
 	public static Vector3 GenerateFlower(int i)
 	{
-        var x = -0.5f + i * 0.2f;
-        var y = 0f;
-        var z = -0.5f + i * 0.2f;
-		return new Vector3(x,y,z);
+		PeseudoRanVec3();
+		return vects[i];
 	}
 
 	//based on x,y,z determines the type of flower or grass
@@ -116,4 +115,15 @@ public class Utils
 
         return total/maxValue;
     }
+
+	static void PeseudoRanVec3() 
+	{
+		if (gen)
+			return;
+		gen = true;
+		for (int i = 0; i < 20; i++)
+		{
+			vects[i] = new Vector3(Random.Range(-0.5f, 0.5f),0, Random.Range(-0.5f, 0.5f));
+		}
+	}
 }

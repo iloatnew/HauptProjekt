@@ -65,9 +65,19 @@ public class World : MonoBehaviour
 		int blx = (int) (Mathf.Round(pos.x) - cx);
 		int bly = (int) (Mathf.Round(pos.y) - cy);
 		int blz = (int) (Mathf.Round(pos.z) - cz);
-
-        // Create chunk name 
-		string cn = BuildChunkName(new Vector3(cx,cy,cz));
+		// Create chunk name 
+		/*
+		 * Bug: sometime blz will be negativ;
+		 * Fix: redirect blz to nearby chunk
+		 * */
+		string cn;
+		if (blz < 0) 
+		{
+			blz = 8 + blz;
+			cn = BuildChunkName(new Vector3(cx, cy, (cz-8) ));
+		}
+		else
+			cn = BuildChunkName(new Vector3(cx,cy,cz));
 		Chunk c;
         // Find block in chunk
 		if(chunks.TryGetValue(cn, out c))

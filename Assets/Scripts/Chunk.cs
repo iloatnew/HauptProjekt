@@ -190,7 +190,7 @@ public class Chunk
                             chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
                                         chunk.gameObject, this);
 
-                        chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(1,5);
+                        chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0,10);
                         chunkData[x, y, z].aboveSurface = true;
 
 					}

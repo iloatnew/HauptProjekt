@@ -617,12 +617,11 @@ public class Block
 		for (int i = 0; i < numberFlowers; i++)
 		{
             var pos = Utils.GenerateFlower(i);
-			var f = 0.3f;
+			var f = 0.2f;
 			CreatFlower(Cubeside.DIAGONALLEFT, f, pos);
 			CreatFlower(Cubeside.DIAGONALRIGHT, f, pos);
 			CreatFlower(Cubeside.DIAGONALFRONT, f, pos);
 			CreatFlower(Cubeside.DIAGONALBACK, f, pos);
-
 		}
 		
 	}
