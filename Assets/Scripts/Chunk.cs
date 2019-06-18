@@ -161,34 +161,41 @@ public class Chunk
 						chunkData[x, y, z] = new Block(Block.BlockType.BEDROCK, pos,
 										chunk.gameObject, this);
 					// Place Diamond, Redstone or Stone at certain heights and probabilities
-					else if (worldY <= Utils.GenerateStoneHeight(worldX, worldZ))
-					{
-						if (Utils.fBM3D(worldX, worldY, worldZ, 0.01f, 2) < 0.4f && worldY < 40)
-							chunkData[x, y, z] = new Block(Block.BlockType.DIAMOND, pos,
-										chunk.gameObject, this);
-						else if (Utils.fBM3D(worldX, worldY, worldZ, 0.03f, 3) < 0.41f && worldY < 20)
-							chunkData[x, y, z] = new Block(Block.BlockType.REDSTONE, pos,
-										chunk.gameObject, this);
-						else
-							chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
-										   chunk.gameObject, this);
-					}
+					//else if (worldY <= Utils.GenerateStoneHeight(worldX, worldZ))
+					//{
+					//	if (Utils.fBM3D(worldX, worldY, worldZ, 0.01f, 2) < 0.4f && worldY < 40)
+					//		chunkData[x, y, z] = new Block(Block.BlockType.DIAMOND, pos,
+					//					chunk.gameObject, this);
+					//	else if (Utils.fBM3D(worldX, worldY, worldZ, 0.03f, 3) < 0.41f && worldY < 20)
+					//		chunkData[x, y, z] = new Block(Block.BlockType.REDSTONE, pos,
+					//					chunk.gameObject, this);
+					//	else
+					//		chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
+					//					   chunk.gameObject, this);
+					//}
 					else if (worldY == surfaceHeight+1)
 					{
-                        var ran = UnityEngine.Random.Range(0, 10);
+                        Vector2 loc = new Vector2(worldX, worldZ);
+                        if (World.riverPoints.Contains(loc)) { 
+                            chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
+                                        chunk.gameObject, this);
+                        }
+                        else { 
+                            var ran = UnityEngine.Random.Range(0, 10);
 
-                        if (ran > 8f)
-                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER1, pos,
-                                        chunk.gameObject, this);
-                        else if(ran > 6)
-							chunkData[x, y, z] = new Block(Block.BlockType.FLOWER2, pos,
-										chunk.gameObject, this);
-                        else if (ran > 4)
-                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER3, pos,
-                                        chunk.gameObject, this);
-                        else
-                            chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
-                                        chunk.gameObject, this);
+                            if (ran > 8f)
+                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER1, pos,
+                                            chunk.gameObject, this);
+                            else if(ran > 6)
+							    chunkData[x, y, z] = new Block(Block.BlockType.FLOWER2, pos,
+										    chunk.gameObject, this);
+                            else if (ran > 4)
+                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER3, pos,
+                                            chunk.gameObject, this);
+                            else
+                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
+                                            chunk.gameObject, this);
+                        }
 
                         chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0,10);
                         chunkData[x, y, z].aboveSurface = true;
@@ -197,8 +204,15 @@ public class Chunk
 					// Place trunks of a tree or grass blocks on the surface
 					else if (worldY == surfaceHeight)
 					{
-						chunkData[x, y, z] = new Block(Block.BlockType.GRASS, pos,
-									chunk.gameObject, this);
+                        //TODO: add river depends on algorithmus
+                        //river shall also at height surface, and down to 3 or 4 blocks under.
+                        Vector2 loc = new Vector2(worldX, worldZ);
+                        if(World.riverPoints.Contains(loc))
+                            chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
+                                    chunk.gameObject, this);
+                        else
+                            chunkData[x, y, z] = new Block(Block.BlockType.GRASS, pos,
+									    chunk.gameObject, this);
 						chunkData[x, y, z].onSurface = true;
 
 					}
@@ -226,10 +240,12 @@ public class Chunk
 				}
 	}
 
+   
+
     /// <summary>
     /// Redraws this chunk by destroying all mesh and collision components and then creating new ones.
     /// </summary>
-	public void Redraw()
+    public void Redraw()
 	{
 		GameObject.DestroyImmediate(chunk.GetComponent<MeshFilter>());
 		GameObject.DestroyImmediate(chunk.GetComponent<MeshRenderer>());
@@ -255,7 +271,7 @@ public class Chunk
 				for(int y = 0; y < World.chunkSize; y++)
 					for(int x = 0; x < World.chunkSize; x++)
 					{
-						BuildTrees(chunkData[x,y,z],x,y,z);
+						//BuildTrees(chunkData[x,y,z],x,y,z);
 					}
 			treesCreated = true;		
 		}

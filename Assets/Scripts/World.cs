@@ -25,7 +25,7 @@ public class World : MonoBehaviour
 	public static CoroutineQueue queue;
 
 	public Vector3 lastbuildPos;
-
+    public static List<Vector2> riverPoints;
     /// <summary>
     /// Creates a name for the chunk based on its position
     /// </summary>
@@ -87,6 +87,46 @@ public class World : MonoBehaviour
 		else
 			return null;
 	}
+
+    /// <summary>
+    /// Create a set of positions, where shall be a rive
+    /// </summary>
+    /// <param name="worldX">start x</param>
+    /// <returns>the list of points</returns>
+    public List<Vector2> BlockOnRiver(int worldX, int worldZ)
+    {
+        float lowestHeight;
+        Vector2 lowestNeighbour = new Vector2((int)worldX, (int)worldZ);
+        List<Vector2> list = new List<Vector2>() { };
+        bool change = false;
+        int i = 0;
+        do
+        {
+            i++;
+            lowestHeight = Utils.GenerateHeightFloat(worldX, worldZ, 0, 150);
+            list.Add(lowestNeighbour);
+            worldX = (int)lowestNeighbour.x;
+            worldZ = (int)lowestNeighbour.y;
+            Vector2[] neighbours = new Vector2[] {
+                new Vector2(worldX-1, worldZ),
+                new Vector2(worldX, worldZ-1),
+                new Vector2(worldX, worldZ+1),
+                new Vector2(worldX+1, worldZ)};
+            
+            foreach (Vector2 neighbour in neighbours)
+            {
+                if (Utils.GenerateHeightFloat((int)neighbour.x, (int)neighbour.y, 0f, 150) < lowestHeight)
+                {
+                    lowestHeight = Utils.GenerateHeightFloat((int)neighbour.x, (int)neighbour.y, 0f, 150);
+                    lowestNeighbour = neighbour;
+                    change = true;
+                }
+            }
+
+        } while (change && i < 500);
+        // reach a relativ lowest point, no lower neighbour
+        return list;
+    }
 
     /// <summary>
     /// Instantiates a new chunk at a specified location.
@@ -216,7 +256,9 @@ public class World : MonoBehaviour
     /// </summary>
 	void Start ()
     {
-		Vector3 ppos = player.transform.position;
+        riverPoints = BlockOnRiver(23, -5);
+
+        Vector3 ppos = player.transform.position;
 		player.transform.position = new Vector3(ppos.x,
 											Utils.GenerateHeight(ppos.x,ppos.z) + 1,
 											ppos.z);
