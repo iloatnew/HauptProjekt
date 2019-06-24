@@ -173,10 +173,16 @@ public class Chunk
 					//		chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
 					//					   chunk.gameObject, this);
 					//}
-					else if (worldY == surfaceHeight+1)
+					else if (worldY == surfaceHeight + 1 && worldY>=World.WaterHeight-1)
 					{
-                        Vector2 loc = new Vector2(worldX, worldZ);
-                        if (World.riverPoints.Contains(loc)) { 
+
+						Vector2 loc = new Vector2(worldX, worldZ);
+						if (worldY == World.WaterHeight - 1)
+						{
+							chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
+										chunk.gameObject, this);
+						}
+						else if (World.riverPoints.Contains(loc)) { 
                             chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
                                         chunk.gameObject, this);
                         }
@@ -195,25 +201,36 @@ public class Chunk
                             else
                                 chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
                                             chunk.gameObject, this);
-                        }
-
-                        chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0,10);
+							chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0, 10);
+						}
                         chunkData[x, y, z].aboveSurface = true;
-
+						//if (worldY == 65)
+						//{
+						//	chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
+						//				chunk.gameObject, this);
+						//	chunkData[x, y, z].aboveSurface = false;
+						//	chunkData[x, y, z].onSurface = true;
+						//}
 					}
 					// Place trunks of a tree or grass blocks on the surface
 					else if (worldY == surfaceHeight)
 					{
-                        //TODO: add river depends on algorithmus
-                        //river shall also at height surface, and down to 3 or 4 blocks under.
-                        Vector2 loc = new Vector2(worldX, worldZ);
-                        if(World.riverPoints.Contains(loc))
+						//TODO: add river depends on algorithmus
+						//river shall also at height surface, and down to 3 or 4 blocks under.
+						Vector2 loc = new Vector2(worldX, worldZ);
+						if (World.riverPoints.Contains(loc))
                             chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
                                     chunk.gameObject, this);
                         else
                             chunkData[x, y, z] = new Block(Block.BlockType.GRASS, pos,
 									    chunk.gameObject, this);
 						chunkData[x, y, z].onSurface = true;
+						if (worldY == World.WaterHeight - 1)
+						{
+							chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
+										chunk.gameObject, this);
+							chunkData[x, y, z].onSurface = false;
+						}
 
 					}
 					// Place dirt blocks
@@ -221,7 +238,7 @@ public class Chunk
 						chunkData[x, y, z] = new Block(Block.BlockType.DIRT, pos,
 										chunk.gameObject, this);
 					// Place water blocks below height 65
-					else if (worldY < 65)
+					else if (worldY < World.WaterHeight)
 						chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
 										fluid.gameObject, this);
 					// Place air blocks
@@ -289,12 +306,6 @@ public class Chunk
 
         // Prepare transparent chunk mesh
 		CombineQuads(fluid.gameObject, fluidMaterial);
-
-		// Prepare flower chunk mesh
-		int worldX = (int)(chunk.transform.position.x);
-		int worldY = (int)(chunk.transform.position.y);
-		int worldZ = (int)(chunk.transform.position.z);
-
         CombineQuads(flower.gameObject, extraMaterial);
 		status = ChunkStatus.DONE;
 	}

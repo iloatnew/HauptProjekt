@@ -13,6 +13,7 @@ public class World : MonoBehaviour
 	public Material textureAtlas;
 	public Material fluidTexture;
 	public Material grassAtlas;
+	public static int WaterHeight = 55;
 	public static int columnHeight = 16;
 	public static int chunkSize = 8;
 	public static int radius = 3;
@@ -89,7 +90,7 @@ public class World : MonoBehaviour
 	}
 
     /// <summary>
-    /// Create a set of positions, where shall be a rive
+    /// Create a set of positions, where shall be a river
     /// </summary>
     /// <param name="worldX">start x</param>
     /// <returns>the list of points</returns>
@@ -98,11 +99,12 @@ public class World : MonoBehaviour
         float lowestHeight;
         Vector2 lowestNeighbour = new Vector2((int)worldX, (int)worldZ);
         List<Vector2> list = new List<Vector2>() { };
-        bool change = false;
-        int i = 0;
+		List<Vector2> RiverSideList = new List<Vector2>() { };
+		int i = 0;
         do
         {
-            i++;
+			bool change = false;
+			i++;
             lowestHeight = Utils.GenerateHeightFloat(worldX, worldZ, 0, 150);
             list.Add(lowestNeighbour);
             worldX = (int)lowestNeighbour.x;
@@ -113,18 +115,27 @@ public class World : MonoBehaviour
                 new Vector2(worldX, worldZ+1),
                 new Vector2(worldX+1, worldZ)};
             
+			// lowestNeighbor: current river position, neighbour: a block nearby
             foreach (Vector2 neighbour in neighbours)
             {
-                if (Utils.GenerateHeightFloat((int)neighbour.x, (int)neighbour.y, 0f, 150) < lowestHeight)
+				if(list.Count>2)
+					if (neighbour != list[list.Count - 2])
+						RiverSideList.Add(neighbour);
+				if (Utils.GenerateHeightFloat((int)neighbour.x, (int)neighbour.y, 0f, 150) < lowestHeight && neighbour!=lowestNeighbour)
                 {
                     lowestHeight = Utils.GenerateHeightFloat((int)neighbour.x, (int)neighbour.y, 0f, 150);
                     lowestNeighbour = neighbour;
                     change = true;
                 }
             }
-
-        } while (change && i < 500);
-        // reach a relativ lowest point, no lower neighbour
+			if (!change) 
+			{
+				lowestNeighbour = list[list.Count - 1] + (list[list.Count - 1] - list[list.Count - 2]);
+				//Debug.Log("last: " + list[list.Count - 1] + " cur: " + lowestNeighbour);
+			}
+        } while (lowestHeight>=WaterHeight && i < 100);
+		// reach a relativ lowest point, no lower neighbour
+		list.AddRange(RiverSideList);
         return list;
     }
 
