@@ -173,7 +173,7 @@ public class Chunk
 					//		chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
 					//					   chunk.gameObject, this);
 					//}
-					else if (worldY == surfaceHeight + 1 && worldY>=World.WaterHeight-1)
+					else if (worldY == surfaceHeight + 1 && worldY >= World.WaterHeight - 1)
 					{
 
 						Vector2 loc = new Vector2(worldX, worldZ);
@@ -182,28 +182,48 @@ public class Chunk
 							chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
 										chunk.gameObject, this);
 						}
-						else if (World.riverPoints.Contains(loc)) { 
-                            chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
-                                        chunk.gameObject, this);
-                        }
-                        else { 
-                            var ran = UnityEngine.Random.Range(0, 10);
+						else if (World.riverPoints.Contains(loc))
+						{
+							chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
+										chunk.gameObject, this);
+						}
+						else if (worldY <= World.StoneHeight && worldY > World.SandHeight &&
+							Mathf.Abs(Utils.GenerateHeightFloat(worldX - 0.5f, worldZ, 0, 150) - Utils.GenerateHeightFloat(worldX, worldZ + 0.5f, 0, 150)) <= 0.9f)
+						{
+							var ran = UnityEngine.Random.Range(0, 10);
 
-                            if (ran > 8f)
-                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER1, pos,
-                                            chunk.gameObject, this);
-                            else if(ran > 6)
-							    chunkData[x, y, z] = new Block(Block.BlockType.FLOWER2, pos,
-										    chunk.gameObject, this);
-                            else if (ran > 4)
-                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER3, pos,
-                                            chunk.gameObject, this);
-                            else
-                                chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
-                                            chunk.gameObject, this);
+							if (ran > 8f)
+								chunkData[x, y, z] = new Block(Block.BlockType.FLOWER1, pos,
+											chunk.gameObject, this);
+							else if (ran > 6)
+								chunkData[x, y, z] = new Block(Block.BlockType.FLOWER2, pos,
+											chunk.gameObject, this);
+							else if (ran > 4)
+								chunkData[x, y, z] = new Block(Block.BlockType.FLOWER3, pos,
+											chunk.gameObject, this);
+							else
+								chunkData[x, y, z] = new Block(Block.BlockType.FLOWER4, pos,
+											chunk.gameObject, this);
 							chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0, 10);
 						}
-                        chunkData[x, y, z].aboveSurface = true;
+						else if (worldY> World.StoneHeight) 
+						{
+							var ran = UnityEngine.Random.Range(0, 10);
+
+							if (ran > 8f)
+								chunkData[x, y, z] = new Block(Block.BlockType.ROCK1, pos,
+											chunk.gameObject, this);
+							else
+								chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
+											chunk.gameObject, this);
+							chunkData[x, y, z].numberFlowers = (int)UnityEngine.Random.Range(0, 1);
+						}
+						else
+						{
+							chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos,
+										  chunk.gameObject, this);
+						}
+						chunkData[x, y, z].aboveSurface = true;
 						//if (worldY == 65)
 						//{
 						//	chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
@@ -219,12 +239,32 @@ public class Chunk
 						//river shall also at height surface, and down to 3 or 4 blocks under.
 						Vector2 loc = new Vector2(worldX, worldZ);
 						if (World.riverPoints.Contains(loc))
-                            chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
-                                    chunk.gameObject, this);
-                        else
-                            chunkData[x, y, z] = new Block(Block.BlockType.GRASS, pos,
-									    chunk.gameObject, this);
+							chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
+									chunk.gameObject, this);
+						else if (worldY < World.SandHeight)
+						{
+							chunkData[x, y, z] = new Block(Block.BlockType.SAND, pos,
+											chunk.gameObject, this);
+						}
+						else if (worldY > World.StoneHeight ||
+							Mathf.Abs(Utils.GenerateHeightFloat(worldX-0.5f,worldZ,0,150) - Utils.GenerateHeightFloat(worldX, worldZ+0.5f, 0, 150)) >0.9f ){ 
+							chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
+										chunk.gameObject, this);
+						}
+						else if(Mathf.Abs(Utils.GenerateHeightFloat(worldX - 0.5f, worldZ, 0, 150) - Utils.GenerateHeightFloat(worldX, worldZ + 0.5f, 0, 150)) > 0.8f &&
+							Mathf.Abs(Utils.GenerateHeightFloat(worldX - 0.5f, worldZ, 0, 150) - Utils.GenerateHeightFloat(worldX, worldZ + 0.5f, 0, 150)) <= 0.9f)
+							chunkData[x, y, z] = new Block(Block.BlockType.DIRT, pos,
+											chunk.gameObject, this);
+						else if(worldY == World.StoneHeight)
+						{ 
+							chunkData[x, y, z] = new Block(Block.BlockType.DIRT, pos,
+										chunk.gameObject, this);
+						}
+						else
+							chunkData[x, y, z] = new Block(Block.BlockType.GRASS, pos,
+										chunk.gameObject, this);
 						chunkData[x, y, z].onSurface = true;
+						// potentially solution for warter edge
 						if (worldY == World.WaterHeight - 1)
 						{
 							chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,

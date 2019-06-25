@@ -9,7 +9,7 @@ public class Utils
 {
 	static readonly int maxHeight = 150;
 	static readonly float smooth = 0.01f;
-	static readonly int octaves = 4;
+	static readonly int octaves = 2;
 	static readonly float persistence = 0.5f;
 	static bool gen = false;
 	static Vector3[] vects = new Vector3[20];

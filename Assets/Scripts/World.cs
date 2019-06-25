@@ -14,6 +14,8 @@ public class World : MonoBehaviour
 	public Material fluidTexture;
 	public Material grassAtlas;
 	public static int WaterHeight = 55;
+	public static int SandHeight = 57;
+	public static int StoneHeight = 85;
 	public static int columnHeight = 16;
 	public static int chunkSize = 8;
 	public static int radius = 3;
@@ -133,7 +135,7 @@ public class World : MonoBehaviour
 				lowestNeighbour = list[list.Count - 1] + (list[list.Count - 1] - list[list.Count - 2]);
 				//Debug.Log("last: " + list[list.Count - 1] + " cur: " + lowestNeighbour);
 			}
-        } while (lowestHeight>=WaterHeight && i < 100);
+        } while (lowestHeight>=WaterHeight && i < 400);
 		// reach a relativ lowest point, no lower neighbour
 		list.AddRange(RiverSideList);
         return list;
@@ -267,7 +269,7 @@ public class World : MonoBehaviour
     /// </summary>
 	void Start ()
     {
-        riverPoints = BlockOnRiver(23, -5);
+        riverPoints = BlockOnRiver(44, -35);
 
         Vector3 ppos = player.transform.position;
 		player.transform.position = new Vector3(ppos.x,

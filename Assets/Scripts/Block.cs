@@ -10,7 +10,7 @@ public class Block
 {
 	enum Cubeside {BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK, DIAGONALLEFT, DIAGONALRIGHT,DIAGONALFRONT, DIAGONALBACK };
 	public enum BlockType {GRASS, DIRT, WATER, STONE, LEAVES, WOOD, WOODBASE, SAND, GOLD, BEDROCK, REDSTONE, DIAMOND, NOCRACK, 
-							CRACK1, CRACK2, CRACK3, CRACK4, LAVA, FLOWER1,FLOWER2,FLOWER3,FLOWER4, AIR};
+							CRACK1, CRACK2, CRACK3, CRACK4, LAVA, FLOWER1,FLOWER2,FLOWER3,FLOWER4,ROCK1,ROCK2,ROCK3, AIR};
 
 	public BlockType blockType;
 	public bool isSolid;
@@ -22,7 +22,7 @@ public class Block
 	public bool aboveSurface;
 	public BlockType health;
 	public int currentHealth;
-	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0,0,0,0, 0};
+	int[] blockHealthMax = {3, 3, 10, 4, 2, 4, 4, 2, 3, -1, 4, 4, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0, 0};
 	int worldX;
 	int worldY;
 	int worldZ;
@@ -67,15 +67,21 @@ public class Block
  								new Vector2(0.1875f,0.0625f), new Vector2(0.25f,0.0625f)},
 		/*LAVA*/			{ new Vector2(0.9375f,0f),  new Vector2(1f,0f),
 								new Vector2(0.9375f,0.0625f), new Vector2(1f,0.0625f)},
-		/*FLOWER1*/			{ new Vector2(0,0.2f),  new Vector2(1f,0.2f),
-								new Vector2(0,0.4f), new Vector2(1f,0.4f)},
-        /*FLOWER2*/			{ new Vector2(0,0.4f),  new Vector2(1f,0.4f),
-                                new Vector2(0,0.6f), new Vector2(1f,0.6f)},
-        /*FLOWER3*/			{ new Vector2(0,0.6f),  new Vector2(1f,0.6f),
-                                new Vector2(0,0.8f), new Vector2(1f,0.8f)},
-        /*FLOWER4*/			{ new Vector2(0,0.8f),  new Vector2(1f,0.8f),
-                                new Vector2(0,1f), new Vector2(1f,1f)},
-                        }; 
+		/*FLOWER1*/			{ new Vector2(0,0.2f),  new Vector2(0.5f,0.2f),
+								new Vector2(0,0.4f), new Vector2(0.5f,0.4f)},
+        /*FLOWER2*/			{ new Vector2(0,0.4f),  new Vector2(0.5f,0.4f),
+                                new Vector2(0,0.6f), new Vector2(0.5f,0.6f)},
+        /*FLOWER3*/			{ new Vector2(0,0.6f),  new Vector2(0.5f,0.6f),
+                                new Vector2(0,0.8f), new Vector2(0.5f,0.8f)},
+        /*FLOWER4*/			{ new Vector2(0,0.8f),  new Vector2(0.5f,0.8f),
+                                new Vector2(0,1f), new Vector2(0.5f,1f)},
+		/*ROCK1*/			{ new Vector2(0.5f,0.8f),  new Vector2(1f,0.8f),
+								new Vector2(0.5f,1f), new Vector2(1f,1f)},
+		/*ROCK2*/			{ new Vector2(0,0f),  new Vector2(0.5f,0f),
+								new Vector2(0,0.2f), new Vector2(0.5f,0.2f)},
+		/*ROCK3*/			{ new Vector2(0.5f,0.6f),  new Vector2(1f,0.6f),
+								new Vector2(0.5f,0.8f), new Vector2(1f,0.8f)},
+						}; 
 
     /// <summary>
     /// Constructs a block.
@@ -104,16 +110,11 @@ public class Block
 	public void SetType(BlockType b)
 	{
 		blockType = b;
-		if(blockType == BlockType.AIR || blockType == BlockType.WATER || blockType == BlockType.FLOWER1
-            || blockType == BlockType.FLOWER2
-            || blockType == BlockType.FLOWER3
-            || blockType == BlockType.FLOWER4)
+		if(blockType == BlockType.AIR || blockType == BlockType.WATER || blockType >= BlockType.FLOWER1)
 			isSolid = false;
 		else
 			isSolid = true;
-		if (blockType == BlockType.FLOWER1 || blockType == BlockType.FLOWER2
-            || blockType == BlockType.FLOWER3
-            || blockType == BlockType.FLOWER4)
+		if (blockType >= BlockType.FLOWER1)
 		{
 			parent = owner.flower.gameObject;
 		}
@@ -153,9 +154,7 @@ public class Block
 										BlockType.WATER,
 										blockHealthMax[(int)BlockType.WATER], 15));
 		}
-		else if (b == BlockType.SAND || b == BlockType.FLOWER1 || blockType == BlockType.FLOWER2
-            || blockType == BlockType.FLOWER3
-            || blockType == BlockType.FLOWER4)
+		else if (b == BlockType.SAND || b >= BlockType.FLOWER1)
 		{
 			owner.mb.StartCoroutine(owner.mb.Drop(this,
 										b,
@@ -474,6 +473,8 @@ public class Block
 			float realZ = worldZ + vertic.z;
 			
 			float realY = Utils.GenerateHeightFloat( realX, realZ, 0, 150 ) - Utils.GenerateHeight(worldX, worldZ);
+			if (blockType == BlockType.STONE)
+				return vertices;
 			//realY = realY % 1f;
 			//Debug.Log(realY);
 			smoothedVertices[i] = new Vector3( vertic.x, realY, vertic.z );
@@ -615,9 +616,7 @@ public class Block
 	{
 		if(blockType == BlockType.AIR) return;
 		// flowers are built in cross not cube
-		if (blockType == BlockType.FLOWER1 || blockType == BlockType.FLOWER2
-            || blockType == BlockType.FLOWER3
-            || blockType == BlockType.FLOWER4) {
+		if (blockType >= BlockType.FLOWER1) {
 			BuildFlowers();
 			return;
 		}
@@ -655,8 +654,10 @@ public class Block
 	{
 		for (int i = 0; i < numberFlowers; i++)
 		{
-            var pos = Utils.GenerateFlower(i);
+			var pos = Utils.GenerateFlower(i);
 			var f = 0.5f;
+			if (blockType > BlockType.ROCK1)
+				f = 0.4f;
 			CreatFlower(Cubeside.DIAGONALLEFT, f, pos);
 			CreatFlower(Cubeside.DIAGONALRIGHT, f, pos);
 			CreatFlower(Cubeside.DIAGONALFRONT, f, pos);
