@@ -15,7 +15,7 @@ public class World : MonoBehaviour
 	public Material grassAtlas;
 	public static int WaterHeight = 55;
 	public static int SandHeight = 57;
-	public static int StoneHeight = 85;
+	public static int StoneHeight = 90;
 	public static int columnHeight = 16;
 	public static int chunkSize = 8;
 	public static int radius = 3;
@@ -29,11 +29,19 @@ public class World : MonoBehaviour
 
 	public Vector3 lastbuildPos;
     public static List<Vector2> riverPoints;
-    /// <summary>
-    /// Creates a name for the chunk based on its position
-    /// </summary>
-    /// <param name="v">Position of tje chunk</param>
-    /// <returns>Returns a string witht he chunk's name</returns>
+	public static List<Vector2> volcanoPoints = new List<Vector2>();
+	
+	public static int worldTime;
+	static float worldTimeFloat;
+	static float oldTimeFloat;
+	List<Vector3> directionList = new List<Vector3>();
+	List<GameObject> eruptionPointList = new List<GameObject>();
+	public static List<Vector3>volcanoBottomWorldPos = new List<Vector3>();
+	/// <summary>
+	/// Creates a name for the chunk based on its position
+	/// </summary>
+	/// <param name="v">Position of tje chunk</param>
+	/// <returns>Returns a string witht he chunk's name</returns>
 	public static string BuildChunkName(Vector3 v)
 	{
 		return (int)v.x + "_" + 
@@ -141,12 +149,30 @@ public class World : MonoBehaviour
         return list;
     }
 
-    /// <summary>
-    /// Instantiates a new chunk at a specified location.
-    /// </summary>
-    /// <param name="x">y position of the chunk</param>
-    /// <param name="y">y position of the chunk</param>
-    /// <param name="z">z position of the chunk</param>
+	public static bool IsVolcanoChunk(Vector3 pos)
+	{
+		if (Utils.GenerateHeight(pos.x, pos.z) > World.StoneHeight + 20)
+		{
+			Vector2 potentialPos = new Vector2(pos.x, pos.z);
+			foreach (Vector2 point in volcanoPoints)
+			{
+				if ((potentialPos - point).SqrMagnitude() < 10000)
+					return false;
+			}
+			volcanoPoints.Add(potentialPos);
+			volcanoBottomWorldPos.Add(new Vector3(potentialPos.x, StoneHeight + 11, potentialPos.y));
+			return true;
+		}
+		return false;
+		
+	}
+
+	/// <summary>
+	/// Instantiates a new chunk at a specified location.
+	/// </summary>
+	/// <param name="x">y position of the chunk</param>
+	/// <param name="y">y position of the chunk</param>
+	/// <param name="z">z position of the chunk</param>
 	private void BuildChunkAt(int x, int y, int z)
 	{
 		Vector3 chunkPosition = new Vector3(x*chunkSize, 
@@ -281,7 +307,8 @@ public class World : MonoBehaviour
 		firstbuild = true;
 		chunks = new ConcurrentDictionary<string, Chunk>();
 		this.transform.position = Vector3.zero;
-		this.transform.rotation = Quaternion.identity;	
+		this.transform.rotation = Quaternion.identity;
+		
 
 		queue = new CoroutineQueue(maxCoroutines, StartCoroutine);
 
@@ -298,14 +325,32 @@ public class World : MonoBehaviour
 											(int)(player.transform.position.z / chunkSize), radius, radius ) );
 	}
 
+
+
 	/// <summary>
 	/// Unity lifecycle update method. Actviates the player's GameObject. Updates chunks based on the player's position.
 	/// </summary>
 	void Update ()
     {
-        // Determine whether to build/load more chunks around the player's location
-		Vector3 movement = lastbuildPos - player.transform.position;
+		worldTimeFloat = worldTimeFloat + Time.deltaTime;
+		if (worldTimeFloat - oldTimeFloat <= 10)
+		{
+			volcanoEruptting();//the eruption lasts 10 seconds, this is the method that squirrs magma.
+		}
+		if (worldTimeFloat - oldTimeFloat >= 15)
+		{
+			//clearOldMagma(); //not using at first
 
+			oldTimeFloat = worldTimeFloat;
+			volcanoEruptionEnd();//only clears lists now
+			volcanoErruptionInit();
+			//testMagmaInteraction();
+		}
+		worldTime = (int)worldTimeFloat;
+
+		// Determine whether to build/load more chunks around the player's location
+		Vector3 movement = lastbuildPos - player.transform.position;
+		
 		if(movement.magnitude > chunkSize )
 		{
 			lastbuildPos = player.transform.position;
@@ -322,5 +367,66 @@ public class World : MonoBehaviour
         // Draw new chunks and removed deprecated chunks
 		queue.Run(DrawChunks());
 		queue.Run(RemoveOldChunks());
+	}
+
+	//bind the direction to the erruption point
+	void volcanoErruptionInit()
+	{
+
+		while (directionList.Count < 10)
+		{
+			var seedx = UnityEngine.Random.Range(-0.1f, 0.1f);
+			var seedz = UnityEngine.Random.Range(-0.1f, 0.1f);
+			directionList.Add(new Vector3(seedx, 25, seedz));
+		}
+
+		while (eruptionPointList.Count < 10)
+		{
+			eruptionPointList.Add(new GameObject("erruptionPoint"));
+		}
+		foreach (Vector3 pos in volcanoBottomWorldPos)
+			foreach (GameObject erruptionPoint in eruptionPointList)
+			{
+				erruptionPoint.transform.position = pos + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f));
+				erruptionPoint.AddComponent<EruptionPoint>();
+				erruptionPoint.GetComponent<EruptionPoint>().direction = directionList[0];
+				directionList.RemoveAt(0);
+				//Debug.Log(erruptionPoint.GetComponent<EruptionPoint>().direction);
+			}
+	}
+	private void volcanoEruptting()
+	{
+		//MeshCollider mc = magma.AddComponent<MeshCollider>();
+		//mc.sharedMesh = magma.GetComponent<MeshFilter>().mesh;
+		//GameObject eruptionPoint = GameObject.Find("EruptionPoint");
+		//Vector3 chunkPos = WorldToLocalChunk(volcanoBottomWorldPos);
+		//Vector3 blockPos = WorldToLocalBlock(volcanoBottomWorldPos);
+		foreach (GameObject erruptionPoint in eruptionPointList)
+		{
+			GameObject magma = new GameObject("magma");
+			//Debug.Log("magma created");
+			magma.transform.position = erruptionPoint.transform.position;
+			magma.AddComponent<MeshFilter>();
+			magma.AddComponent<MeshRenderer>();
+			magma.AddComponent<mCube>();
+
+			MeshRenderer mr = magma.GetComponent<MeshRenderer>();
+			mr.material = Resources.Load("minecraft") as Material;
+			magma.AddComponent<BoxCollider>();
+			magma.AddComponent<Rigidbody>();
+			magma.GetComponent<Rigidbody>().isKinematic = false;
+			magma.GetComponent<Rigidbody>().AddForce(erruptionPoint.GetComponent<EruptionPoint>().direction, ForceMode.Impulse);
+		}
+
+	}
+
+	private void volcanoEruptionEnd()
+	{
+		foreach (GameObject eruptionPoint in eruptionPointList)
+		{
+			Destroy(eruptionPoint);
+		}
+		eruptionPointList.Clear();
+		directionList.Clear();
 	}
 }

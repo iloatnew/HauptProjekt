@@ -126,10 +126,42 @@ public class Chunk
 					}
 				}
 	}
-
-    /// <summary>
-    /// Builds the chunk from scatch or loads it from file. This functions does not draw the chunk.
-    /// </summary>
+	/// <summary>
+	/// Create a set of positions, where shall be a vulcano
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	bool GenerateVolcano(int x, int y, int z, int worldX, int worldY, int worldZ)
+	{
+		Vector3 pos = new Vector3(x, y, z);
+		int surfaceHeight = Utils.GenerateHeight(worldX, worldZ);
+		World.IsVolcanoChunk(new Vector3(worldX, worldY, worldZ));
+		Vector2 posVec2 = new Vector2(worldX, worldZ);
+		bool built = false;
+		foreach (Vector2 volPoint in World.volcanoPoints)
+		{
+			double distanceToValcano = (posVec2 - volPoint).magnitude;
+			if (distanceToValcano <= World.chunkSize * 1 && worldY <= surfaceHeight + 2)
+			{
+				built = true;
+				if (worldY >= World.StoneHeight + 12)
+					chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos, chunk.gameObject, this);
+				else if(worldY >= World.StoneHeight + 10)
+					chunkData[x, y, z] = new Block(Block.BlockType.LAVA, pos, chunk.gameObject, this);
+				else
+					built = false;
+			}
+			else if (distanceToValcano <= World.chunkSize * 1.5 && worldY <= surfaceHeight + 2 && worldY >= World.StoneHeight + 12)
+			{
+				chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos, chunk.gameObject, this);
+				built = true;
+			}
+		}
+		return built;
+	}
+	/// <summary>
+	/// Builds the chunk from scatch or loads it from file. This functions does not draw the chunk.
+	/// </summary>
 	private void BuildChunk()
 	{
 		bool dataFromFile = false;
@@ -146,33 +178,28 @@ public class Chunk
 					int worldY = (int)(y + chunk.transform.position.y);
 					int worldZ = (int)(z + chunk.transform.position.z);
 
-                    // Load chunk from file
-					if(dataFromFile)
+					int surfaceHeight = Utils.GenerateHeight(worldX, worldZ);
+
+					if (GenerateVolcano(x, y, z, worldX, worldY, worldZ))
+					{
+						chunkData[x, y, z].onSurface = true;
+						continue;
+					}	
+
+
+					// Load chunk from file
+						if (dataFromFile)
 					{
 						chunkData[x,y,z] = new Block(bd.matrix[x, y, z], pos, 
 						                chunk.gameObject, this);
 						continue;
 					}
 
-					int surfaceHeight = Utils.GenerateHeight(worldX,worldZ);
-                    float surfaceHeightFloat = Utils.GenerateHeightFloat(worldX, worldZ, 0, 150);
+                     float surfaceHeightFloat = Utils.GenerateHeightFloat(worldX, worldZ, 0, 150);
 					// Place bedrock at height 0
 					if (worldY == 0)
 						chunkData[x, y, z] = new Block(Block.BlockType.BEDROCK, pos,
 										chunk.gameObject, this);
-					// Place Diamond, Redstone or Stone at certain heights and probabilities
-					//else if (worldY <= Utils.GenerateStoneHeight(worldX, worldZ))
-					//{
-					//	if (Utils.fBM3D(worldX, worldY, worldZ, 0.01f, 2) < 0.4f && worldY < 40)
-					//		chunkData[x, y, z] = new Block(Block.BlockType.DIAMOND, pos,
-					//					chunk.gameObject, this);
-					//	else if (Utils.fBM3D(worldX, worldY, worldZ, 0.03f, 3) < 0.41f && worldY < 20)
-					//		chunkData[x, y, z] = new Block(Block.BlockType.REDSTONE, pos,
-					//					chunk.gameObject, this);
-					//	else
-					//		chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos,
-					//					   chunk.gameObject, this);
-					//}
 					else if (worldY == surfaceHeight + 1 && worldY >= World.WaterHeight - 1)
 					{
 
@@ -224,13 +251,6 @@ public class Chunk
 										  chunk.gameObject, this);
 						}
 						chunkData[x, y, z].aboveSurface = true;
-						//if (worldY == 65)
-						//{
-						//	chunkData[x, y, z] = new Block(Block.BlockType.WATER, pos,
-						//				chunk.gameObject, this);
-						//	chunkData[x, y, z].aboveSurface = false;
-						//	chunkData[x, y, z].onSurface = true;
-						//}
 					}
 					// Place trunks of a tree or grass blocks on the surface
 					else if (worldY == surfaceHeight)
