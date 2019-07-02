@@ -156,11 +156,11 @@ public class World : MonoBehaviour
 			Vector2 potentialPos = new Vector2(pos.x, pos.z);
 			foreach (Vector2 point in volcanoPoints)
 			{
-				if ((potentialPos - point).SqrMagnitude() < 10000)
+				if ((potentialPos - point).SqrMagnitude() < 1000)
 					return false;
 			}
 			volcanoPoints.Add(potentialPos);
-			volcanoBottomWorldPos.Add(new Vector3(potentialPos.x, StoneHeight + 11, potentialPos.y));
+			volcanoBottomWorldPos.Add(new Vector3(potentialPos.x, Utils.GenerateHeight(pos.x, pos.z) - 9, potentialPos.y));
 			return true;
 		}
 		return false;

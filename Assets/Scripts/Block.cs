@@ -473,8 +473,8 @@ public class Block
 			float realZ = worldZ + vertic.z;
 			
 			float realY = Utils.GenerateHeightFloat( realX, realZ, 0, 150 ) - Utils.GenerateHeight(worldX, worldZ);
-			if (blockType == BlockType.STONE)
-				return vertices;
+			//if (blockType == BlockType.STONE)
+			//	return vertices;
 			//realY = realY % 1f;
 			//Debug.Log(realY);
 			smoothedVertices[i] = new Vector3( vertic.x, realY, vertic.z );
@@ -626,28 +626,13 @@ public class Block
 		if (!HasSolidNeighbour((int)position.x, (int)position.y, (int)position.z - 1) || (isSolid && (aboveSurface || onSurface)))
 			CreateQuad(Cubeside.BACK);
 		if (!HasSolidNeighbour((int)position.x, (int)position.y + 1, (int)position.z) || (isSolid && (aboveSurface || onSurface)))
-		{
 			CreateQuad(Cubeside.TOP);
-		}
 		if (!HasSolidNeighbour((int)position.x, (int)position.y - 1, (int)position.z) || (isSolid && (aboveSurface || onSurface)))
 			CreateQuad(Cubeside.BOTTOM);
 		if (!HasSolidNeighbour((int)position.x - 1, (int)position.y, (int)position.z) || (isSolid && (aboveSurface || onSurface)))
 			CreateQuad(Cubeside.LEFT);
 		if (!HasSolidNeighbour((int)position.x + 1, (int)position.y, (int)position.z) || (isSolid && (aboveSurface || onSurface)))
 			CreateQuad(Cubeside.RIGHT);
-
-		//if (!HasSolidNeighbour(new Vector3((int)worldX, (int)worldY, (int)worldZ + 1)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.FRONT);
-		//if (!HasSolidNeighbour(new Vector3((int)worldX, (int)worldY, (int)worldZ - 1)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.BACK);
-		//if (!HasSolidNeighbour(new Vector3((int)worldX, (int)worldY + 1, (int)worldZ)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.TOP);
-		//if (!HasSolidNeighbour(new Vector3((int)worldX, (int)worldY - 1, (int)worldZ)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.BOTTOM);
-		//if (!HasSolidNeighbour(new Vector3((int)worldX - 1, (int)worldY, (int)worldZ)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.LEFT);
-		//if (!HasSolidNeighbour(new Vector3((int)worldX + 1, (int)worldY, (int)worldZ)) || (isSolid && (aboveSurface || onSurface)))
-		//	CreateQuad(Cubeside.RIGHT);
 	}
 
 	private void BuildFlowers()

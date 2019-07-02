@@ -135,23 +135,22 @@ public class Chunk
 	{
 		Vector3 pos = new Vector3(x, y, z);
 		int surfaceHeight = Utils.GenerateHeight(worldX, worldZ);
-		World.IsVolcanoChunk(new Vector3(worldX, worldY, worldZ));
 		Vector2 posVec2 = new Vector2(worldX, worldZ);
 		bool built = false;
 		foreach (Vector2 volPoint in World.volcanoPoints)
 		{
 			double distanceToValcano = (posVec2 - volPoint).magnitude;
-			if (distanceToValcano <= World.chunkSize * 1 && worldY <= surfaceHeight + 2)
+			if (distanceToValcano <= World.chunkSize * 0.7 && worldY <= surfaceHeight + 2)
 			{
 				built = true;
-				if (worldY >= World.StoneHeight + 12)
+				if (worldY >= surfaceHeight - 8)
 					chunkData[x, y, z] = new Block(Block.BlockType.AIR, pos, chunk.gameObject, this);
-				else if(worldY >= World.StoneHeight + 10)
+				else if(worldY >= surfaceHeight - 10)
 					chunkData[x, y, z] = new Block(Block.BlockType.LAVA, pos, chunk.gameObject, this);
 				else
 					built = false;
 			}
-			else if (distanceToValcano <= World.chunkSize * 1.5 && worldY <= surfaceHeight + 2 && worldY >= World.StoneHeight + 12)
+			else if (distanceToValcano <= World.chunkSize * 1 && worldY <= surfaceHeight + 1 && worldY >= surfaceHeight - 10)
 			{
 				chunkData[x, y, z] = new Block(Block.BlockType.STONE, pos, chunk.gameObject, this);
 				built = true;
@@ -182,7 +181,7 @@ public class Chunk
 
 					if (GenerateVolcano(x, y, z, worldX, worldY, worldZ))
 					{
-						chunkData[x, y, z].onSurface = true;
+						chunkData[x, y, z].onSurface = false;
 						continue;
 					}	
 
@@ -442,6 +441,17 @@ public class Chunk
 		cubeMaterial = c;
 		fluidMaterial = t;
 		extraMaterial = f;
+		for (int z = 0; z < World.chunkSize; z++)
+			for (int y = 0; y < World.chunkSize; y++)
+				for (int x = 0; x < World.chunkSize; x++)
+				{
+					Vector3 pos = new Vector3(x, y, z);
+					int worldX = (int)(x + chunk.transform.position.x);
+					int worldY = (int)(y + chunk.transform.position.y);
+					int worldZ = (int)(z + chunk.transform.position.z);
+					World.IsVolcanoChunk(new Vector3(worldX, worldY, worldZ));
+				}
+
 		BuildChunk();                                                   // Start building the chunk
 	}
 	
