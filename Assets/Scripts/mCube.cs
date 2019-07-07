@@ -19,17 +19,9 @@ public class mCube : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
     {
-        Destroy(this.gameObject, 5f);
+        Destroy(this.gameObject, 5);
         GenerateCube();
     }
-    //private void LateUpdate()
-    //{
-    //    if (true||needToUpdate)
-    //    {
-    //        Debug.Log("lateupdate");
-    //        World_Interaction.updateAfterChangeTerrain(LateUpdatePos, LateUpdateBlockName);
-    //    }
-    //}
     void GenerateCube()
     {
         CubeMesh = new Mesh();
@@ -76,10 +68,7 @@ public class mCube : MonoBehaviour
         UVs.Add(new Vector2(textureOffset * texturePos.x + textureOffset, textureOffset * texturePos.y + textureOffset));
         UVs.Add(new Vector2(textureOffset * texturePos.x, textureOffset * texturePos.y + textureOffset));
         UVs.Add(new Vector2(textureOffset * texturePos.x, textureOffset * texturePos.y));
-        //UVs.Add(new Vector2(0.8125f, 0.0625f));
-        //UVs.Add(new Vector2(0.875f, 0.0625f));
-        //UVs.Add(new Vector2(0.875f, 0.125f));
-        //UVs.Add(new Vector2(0.8125f, 0.125f));
+    
         //4 points of the back side
         Vector3 V0 = new Vector3(-0.5f, -0.5f, -0.5f);
         Vector3 V1 = new Vector3(0.5f, -0.5f, -0.5f);
@@ -138,100 +127,72 @@ public class mCube : MonoBehaviour
 	{
 		if (isDestroyed == false)
 		{
-			////Debug.Log("oncollisionEnter" + this.gameObject.transform.position);
-			//if (collision.gameObject.name != "magma") 
-			//{
-			//	//Debug.Log("Destroy");
-			//	isDestroyed = true;
-			//	Destroy(this.gameObject);
-			//	Vector3 collisionPos = this.gameObject.transform.position;
-			//	collisionPos = new Vector3(Mathf.RoundToInt(collisionPos.x), Mathf.RoundToInt(collisionPos.y), Mathf.RoundToInt(collisionPos.z));
-
-			//	Vector3 chunkPos = World.WorldToLocalChunk(collisionPos);
-			//	Vector3 blockPos = World.WorldToLocalBlock(collisionPos);
-
-			//	Chunk foundChunk;
-			//	World.chunkList.TryGetValue(chunkPos, out foundChunk);
-			//	Debug.Log("collisionPos: " + collisionPos);
-			//	Debug.Log("chunkPos: " + chunkPos);
-			//	Debug.Log("blockPos: " + blockPos);
-			//	if (foundChunk != null)
-			//	{
-			//		//Debug.Log("foundChunk");
-			//		Debug.Log("name:" + foundChunk.chunkMap[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z].name);
-			//		switch (foundChunk.chunkMap[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z].name)
-			//		{
-			//			case "Air":
-			//				//Debug.Log("Air");
-			//				collisionPos = collisionPos + new Vector3(0, -1, 0);
-			//				chunkPos = World.WorldToLocalChunk(collisionPos);
-			//				blockPos = World.WorldToLocalBlock(collisionPos);
-			//				foundChunk = World.GetChunkAtPos(collisionPos);
-			//				if (foundChunk.chunkMap[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z].name == "Grass")
-			//				{
-			//					//Debug.Log("in case air and grass");
-			//                             //needToUpdate = true;
-			//                             //LateUpdateBlockName = "Stone";
-			//                             //LateUpdatePos = collisionPos;
-			//					World_Interaction.changeTerrain(collisionPos, "Stone");
-
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, 0), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(0, 0, 1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, 1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, 0), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(0, 0, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, 1), "Stone");
-			//                         }
-			//                         else if (foundChunk.chunkMap[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z].name == "Stone")
-			//                         {
-			//                             World_Interaction.changeTerrain(collisionPos, "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, 0), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(0, 1, 1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, 1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, 0), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(0, 1, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, -1), "Stone");
-			//                             World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, 1), "Stone");
-			//                         }
-			//                         break;
-			//			case "Stone":
-			//                         //Debug.Log("Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(0, 1, 0), "Diamond");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, 0), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(0, 1, 1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, 1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, 0), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(0, 1, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 1, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 1, 1), "Stone");
-			//                         break;
-			//			case "Grass":
-			//                         //Debug.Log("Grass");
-			//                         World_Interaction.changeTerrain(collisionPos, "Diamond");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, 0), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(0, 0, 1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, 1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, 0), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(0, 0, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(1, 0, -1), "Stone");
-			//                         World_Interaction.changeTerrain(collisionPos + new Vector3(-1, 0, 1), "Stone");
-			//                         break;
-
-
-			//		}
-			//	}
-			//}
-
-		}
-		else 
-		{
-		
+			bool effected = false;
+			Vector3 collisionPos = this.gameObject.transform.position;
+			collisionPos = new Vector3(Mathf.RoundToInt(collisionPos.x), Mathf.RoundToInt(collisionPos.y), Mathf.RoundToInt(collisionPos.z));
+			try
+			{
+				Block block = World.GetWorldBlock(collisionPos);
+				if (collision.gameObject.name != "magma" && collision.gameObject.name != "erruptionPoint" && block.blockType!=Block.BlockType.AIR)
+				{
+					Chunk foundChunk = block.owner; 
+					if (foundChunk != null)
+					{
+						//Debug.Log("foundChunk");
+						//Debug.Log("name:" + foundChunk.chunkMap[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z].name);
+						switch (block.blockType)
+						{
+							case Block.BlockType.AIR:
+								Debug.Log("Air");
+								collisionPos = collisionPos + new Vector3(0, -1, 0);
+								block = World.GetWorldBlock(collisionPos);
+								foundChunk = block.owner;
+								if (block.blockType == Block.BlockType.GRASS)
+								{
+									block.blockType = Block.BlockType.DIAMOND;
+									ChangeNeighbor(block);
+									effected = true;
+								}
+								break;
+							case Block.BlockType.STONE:
+								Debug.Log("stoone");
+								break;
+							case Block.BlockType.GRASS:
+								Debug.Log("grass");
+								block.blockType = Block.BlockType.DIAMOND;
+								ChangeNeighbor(block);
+								effected = true;
+								break;
+						}
+					}
+				}
+				if (effected)
+				{
+					isDestroyed = true;
+					Destroy(this.gameObject);
+				}
+			}
+			catch (System.Exception e) { }
 		}
 	}
 
+	void ChangeNeighbor(Block core) 
+	{
+		Vector3 pos = core.position;
+		Block[] neighbors = new Block[]
+		{
+			World.GetWorldBlock(pos + new Vector3(1, 0, 0)),
+			World.GetWorldBlock(pos + new Vector3(0, 0, 1)),
+			World.GetWorldBlock(pos + new Vector3(1, 0, 1)),
+			World.GetWorldBlock(pos + new Vector3(-1, 0, 0)),
+			World.GetWorldBlock(pos + new Vector3(0, 0, -1)),
+			World.GetWorldBlock(pos + new Vector3(-1, 0, -1)),
+			World.GetWorldBlock(pos + new Vector3(1, 0, -1)),
+			World.GetWorldBlock(pos + new Vector3(-1, 0, 1)),
+		};
+		foreach (Block b in neighbors) 
+		{
+			b.blockType = Block.BlockType.STONE;
+		}
+	}
 }

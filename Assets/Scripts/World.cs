@@ -295,7 +295,7 @@ public class World : MonoBehaviour
     /// </summary>
 	void Start ()
     {
-        riverPoints = BlockOnRiver(44, -35);
+        riverPoints = BlockOnRiver(90, -30);
 
         Vector3 ppos = player.transform.position;
 		player.transform.position = new Vector3(ppos.x,
@@ -373,14 +373,14 @@ public class World : MonoBehaviour
 	void volcanoErruptionInit()
 	{
 
-		while (directionList.Count < 10)
+		while (directionList.Count < 5)
 		{
 			var seedx = UnityEngine.Random.Range(-0.1f, 0.1f);
 			var seedz = UnityEngine.Random.Range(-0.1f, 0.1f);
 			directionList.Add(new Vector3(seedx, 25, seedz));
 		}
 
-		while (eruptionPointList.Count < 10)
+		while (eruptionPointList.Count < 5)
 		{
 			eruptionPointList.Add(new GameObject("erruptionPoint"));
 		}
